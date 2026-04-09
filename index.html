@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CRM Prospection</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
 :root{
@@ -41,59 +44,178 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .auth-field input::placeholder{color:var(--hint)}
 .auth-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-d));color:var(--bg);border:none;border-radius:var(--r2);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:var(--t);margin-top:8px;letter-spacing:.02em}
 .auth-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 24px #c9a96e20}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .auth-link{display:block;text-align:center;margin-top:18px;font-size:12px;color:var(--sub);cursor:pointer;transition:var(--t)}
 .auth-link:hover{color:var(--gold)}
 .auth-link span{color:var(--gold);font-weight:600}
 .auth-error{background:var(--red-bg);border:1px solid var(--red-b);color:var(--red);font-size:12px;padding:10px 14px;border-radius:var(--r2);margin-bottom:16px;display:none}
 .auth-sep{display:flex;align-items:center;gap:12px;margin:24px 0;color:var(--hint);font-size:11px}
 .auth-sep::before,.auth-sep::after{content:'';flex:1;height:1px;background:var(--border)}
-.auth-user-info{display:flex;align-items:center;gap:10px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 14px;margin-bottom:16px}
-.auth-user-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--gold),var(--gold-d));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--bg);flex-shrink:0}
+.auth-loader{display:none;text-align:center;padding:8px 0;font-size:12px;color:var(--sub)}
 
 /* MOBILE */
-@media(max-width:700px){
-  body{flex-direction:column}
-  .sidebar{width:100%;height:54px;flex-direction:row;padding:0 8px;gap:0;border-right:none;border-top:1px solid var(--border);order:2;justify-content:space-around;position:fixed;bottom:0;left:0;z-index:50;background:var(--s1)}
+@media(max-width:900px){
+  body{flex-direction:column;font-size:13px;height:100vh;overflow:hidden}
+  .sidebar{width:100%;height:58px;flex-direction:row;padding:0 4px;gap:0;border-right:none;border-top:1px solid var(--border);order:2;justify-content:space-around;align-items:center;position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--s1);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  .sidebar::-webkit-scrollbar{display:none}
   .sb-logo,.sb-sep{display:none}
   .sb-bottom{margin-top:0}
-  .sb-item{width:44px;height:44px}
-  .sb-item.active::before{top:auto;bottom:-1px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:3px 3px 0 0}
+  .sb-item{width:42px;height:42px;font-size:18px;flex-shrink:0;border-radius:10px}
+  .sb-item.active{background:var(--gold-bg)}
+  .sb-item.active::before{top:auto;bottom:-2px;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:3px 3px 0 0}
   .sb-tip{display:none}
-  .main{order:1;padding-bottom:54px}
-  .topbar{padding:0 14px;height:48px}
-  .topbar-title{font-size:14px}
-  .search{width:120px;font-size:11px}
-  .search:focus{width:150px}
-  .kpi-strip{overflow-x:auto;flex-wrap:nowrap}
+  .main{order:1;padding-bottom:62px;width:100%;flex:1;min-height:0;overflow:hidden}
+
+  /* Topbar */
+  .topbar{padding:0 12px;height:50px;gap:8px}
+  .topbar-title{font-size:14px;flex-shrink:0}
+  .tb-sep{flex:0 0 auto;width:2px}
+  .search-wrap{flex:1;min-width:0}
+  .search{width:100%;min-width:0;font-size:12px;padding:7px 10px 7px 28px}
+  .search:focus{width:100%}
+  .topbar .btn{padding:6px 10px;font-size:11px}
+  .topbar .btn-ghost.btn-sm{display:none}
+  .topbar > .btn-ghost{display:none}
+
+  /* KPI strip */
+  .kpi-strip{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding:0 12px}
   .kpi-strip::-webkit-scrollbar{display:none}
-  .kpi-item{min-width:105px;padding:10px 12px}
-  .kpi-val{font-size:17px}
-  #view-kanban .view-body{padding:10px 12px;gap:8px}
-  .col{min-width:175px;max-width:175px}
-  #view-list .view-body{padding:0 10px 72px}
-  td,th{padding:8px 10px;font-size:11px}
-  .view-toolbar{padding:10px 14px;flex-wrap:wrap;gap:6px}
-  .vt-count{margin-left:0}
-  .modal{width:100%!important;max-height:95vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0}
+  .kpi-item{min-width:100px;padding:10px 12px;flex:0 0 auto}
+  .kpi-val{font-size:16px}
+  .kpi-lbl{font-size:8px}
+  .kpi-delta{font-size:9px;padding:1px 5px}
+
+  /* Tutos */
+  .tuto-box{margin:10px 12px 0}
+  .tuto-head{padding:10px 12px}
+  .tuto-title{font-size:10px}
+  .tuto-body{font-size:11px}
+  .tuto-box.open .tuto-body{padding:4px 12px 12px;max-height:1000px}
+
+  /* Toolbar */
+  .view-toolbar{padding:10px 12px;flex-wrap:wrap;gap:6px}
+  .vt-label{font-size:9px}
+  .fsel{padding:6px 8px;font-size:11px}
+  .vt-count{margin-left:0;order:99;width:100%;text-align:center}
+
+  /* Kanban */
+  #view-kanban .view-body{padding:10px 12px 16px;gap:10px}
+  .col{min-width:78vw;max-width:78vw;scroll-snap-align:start}
+  #view-kanban .view-body{scroll-snap-type:x mandatory}
+  .kcard{padding:11px 12px}
+
+  /* Liste -> table cards */
+  #view-list .view-body{padding:0 8px 16px;overflow-x:auto}
+  .tbl-wrap{border-radius:var(--r2)}
+  table{font-size:11px}
+  td,th{padding:7px 8px;font-size:10px}
+  .avatar-sm{width:22px;height:22px;font-size:9px;margin-right:6px}
+  .stage-pill,.cat-pill{font-size:9px;padding:2px 6px}
+
+  /* Modals */
   .overlay{align-items:flex-end;padding:0}
-  .form-grid{grid-template-columns:1fr}
+  .modal{width:100%!important;max-width:100%!important;max-height:92vh;border-radius:18px 18px 0 0;position:fixed;bottom:0;left:0;right:0}
+  .modal-header{padding:16px 18px 14px;gap:10px}
+  .modal-avatar{width:38px;height:38px;font-size:14px}
+  .modal-title{font-size:15px}
+  .modal-sub{font-size:11px}
+  .modal-body{padding:16px 18px}
+  .modal-footer{padding:12px 16px;flex-wrap:wrap;gap:6px}
+  .modal-footer .btn{flex:1;justify-content:center}
+  .form-grid{grid-template-columns:1fr;gap:8px;margin-bottom:14px}
   .form-full{grid-column:1}
+  .field input,.field select,.field textarea{font-size:14px;padding:10px 12px}
+  .section-label{font-size:9px;margin-bottom:10px}
+
+  /* Tasks */
   .task-header{padding:12px 14px;flex-wrap:wrap;gap:8px}
   .task-item{padding:12px 14px;gap:10px}
+  .task-name{font-size:12px}
+  .task-desc{font-size:10px}
+  .task-day-badge{font-size:9px;padding:2px 6px}
+  .task-stage{display:none}
+
+  /* Focus mode */
   .focus-overlay{padding:0;align-items:flex-end}
-  .focus-card{width:100%!important;border-radius:20px 20px 0 0}
+  .focus-card{width:100%!important;border-radius:20px 20px 0 0;max-width:100%}
+  .focus-top{padding:24px 22px 0}
+  .focus-actions{padding:0 22px 22px}
+  .focus-close{top:14px;right:14px}
+
+  /* Import / Stats / Settings */
   #view-import .view-body,#view-stats .view-body,#view-settings .view-body{padding:12px}
   .drop-zone{padding:32px 16px}
-  .stats-grid{grid-template-columns:1fr}
-  .modal-header{padding:16px 18px 14px}
-  .modal-body{padding:16px 18px}
-  .modal-footer{padding:12px 18px}
+  .drop-icon{font-size:32px}
+  .drop-title{font-size:14px}
+  .stats-grid{grid-template-columns:1fr;gap:10px}
+  .stat-card,.set-card{padding:16px}
+  .set-card-title{font-size:13px}
   .pe-seq-top{flex-wrap:wrap}
   #view-settings .view-body{max-width:100%}
-  .sum-grid{grid-template-columns:1fr 1fr}
-  .btn{font-size:11px;padding:6px 10px}
-  .topbar .btn{padding:6px 10px;font-size:11px}
-  .auth-card{padding:32px 24px;border-radius:16px}
+  .sum-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .sum-val{font-size:18px}
+
+  /* Buttons */
+  .btn{font-size:12px;padding:8px 12px}
+  .btn-sm{font-size:11px;padding:6px 10px}
+
+  /* Auth */
+  .auth-card{padding:30px 22px;border-radius:18px;width:100%;max-width:420px}
+  .auth-screen{padding:14px}
+
+  /* Dashboard */
+  .act-grid{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr;gap:10px;padding:14px}
+  .dash-welcome{padding:20px}
+  .dash-welcome h2{font-size:18px}
+  .dash-welcome .sub{font-size:11px}
+  .dash-card{padding:16px}
+  .dash-funnel-lbl{width:64px;font-size:10px}
+  .dash-funnel-bar{height:24px;font-size:10px}
+
+  /* Calendar */
+  #view-calendar .view-body{padding:12px}
+  .cal-day{min-height:62px;padding:4px}
+  .cal-day-num{font-size:11px}
+  .cal-day-events{font-size:7px}
+  .cal-event{padding:1px 3px;font-size:7px}
+  .cal-day-name{padding:8px 2px;font-size:8px}
+  .cal-title{font-size:15px}
+  .cal-day-detail{padding:14px}
+
+  /* Pipeline editor */
+  .pe-seq-card{padding:12px}
+  .pe-input,.pe-icon-sel{font-size:12px;padding:6px 8px}
+  .pe-tab{padding:10px 12px;font-size:11px}
+
+  /* Bulk bar */
+  .bulk-bar{flex-wrap:wrap;padding:10px 12px;gap:6px}
+
+  /* Sync indicator */
+  .sync-indicator{bottom:70px;left:12px;font-size:9px;padding:4px 10px}
+
+  /* Toast */
+  .toast{bottom:74px;right:12px;left:12px;justify-content:center;font-size:11px}
+
+  /* Templates editor */
+  .tpl-content{font-size:12px}
+  .tpl-name-input{font-size:13px}
+
+  /* Score bar - hide num on mobile to save space */
+  td .score-bar .score-track{width:24px}
+
+  /* Setting objectives grid */
+  #view-settings .view-body div[style*="grid-template-columns:1fr 1fr 1fr"]{grid-template-columns:1fr!important}
+}
+
+/* Very small phones */
+@media(max-width:380px){
+  .topbar-title{display:none}
+  .kpi-item{min-width:90px;padding:8px 10px}
+  .kpi-val{font-size:14px}
+  .sb-item{width:38px;height:38px;font-size:16px}
+  .col{min-width:85vw;max-width:85vw}
+  .dash-welcome{padding:16px}
 }
 
 /* SIDEBAR */
@@ -107,8 +229,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .sb-tip{position:absolute;left:54px;background:var(--s4);border:1px solid var(--b2);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:.12s;z-index:100}
 .sb-item:hover .sb-tip{opacity:1}
 .sb-bottom{margin-top:auto}
-
-/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{background:var(--s1);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0}
 .topbar-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.01em}
@@ -118,8 +238,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .search{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:7px 10px 7px 30px;color:var(--text);width:200px;font-size:12px;font-family:inherit;transition:var(--t)}
 .search:focus{outline:none;border-color:var(--gold);background:var(--s3);width:240px;box-shadow:0 0 0 3px #c9a96e08}
 .search::placeholder{color:var(--hint)}
-
-/* BUTTONS */
 .btn{cursor:pointer;border:none;border-radius:var(--r2);font-size:12px;font-weight:600;padding:7px 14px;transition:var(--t);font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;line-height:1}
 .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-d));color:var(--bg);font-weight:700}
 .btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 4px 16px #c9a96e18}
@@ -136,8 +254,6 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .fsel{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:6px 10px;color:var(--text);font-size:12px;font-family:inherit;cursor:pointer;transition:var(--t)}
 .fsel:focus{outline:none;border-color:var(--gold)}
 .vt-count{margin-left:auto;font-size:11px;color:var(--sub);background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-weight:500}
-
-/* KPI */
 .kpi-strip{display:flex;padding:0 22px;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s1)}
 .kpi-item{flex:1;padding:14px 16px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
 .kpi-item:last-child{border-right:none}
@@ -150,20 +266,44 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .kd-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
 .kd-orange{background:var(--orange-bg);color:var(--orange);border:1px solid #f59e0b20}
 
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;padding:22px}
+.dash-welcome{background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--b2);border-radius:var(--r);padding:28px;grid-column:1/-1}
+.dash-welcome h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:4px}
+.dash-welcome .sub{font-size:13px;color:var(--sub)}
+.dash-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.dash-card h3{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--hint);margin-bottom:14px}
+.dash-funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dash-funnel-bar{height:28px;border-radius:var(--r3);display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:700;color:#fff;transition:.4s;min-width:32px}
+.dash-funnel-lbl{font-size:11px;color:var(--sub);width:80px;text-align:right;flex-shrink:0}
+.dash-funnel-n{font-size:11px;font-weight:600;color:var(--text);width:30px}
+.dash-recent{display:flex;flex-direction:column;gap:6px}
+.dash-recent-item{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r3);font-size:12px}
+.dash-recent-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:var(--s3)}
+.dash-recent-info{flex:1;min-width:0}
+.dash-recent-info .lbl{font-weight:600;font-size:12px}
+.dash-recent-info .desc{font-size:10px;color:var(--sub);margin-top:1px}
+.priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.priority-hot{background:#ef4444}
+.priority-warm{background:#f59e0b}
+.priority-cold{background:#22d3ee}
+
 /* KANBAN */
 #view-kanban .view-body{display:flex;gap:10px;padding:16px 22px;overflow-x:auto;flex:1;align-items:flex-start}
 #view-kanban .view-body::-webkit-scrollbar{height:3px}
 #view-kanban .view-body::-webkit-scrollbar-thumb{background:var(--hint);border-radius:2px}
 .col{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);min-width:215px;max-width:215px;display:flex;flex-direction:column;max-height:100%;transition:var(--t)}
+.col.drag-over{border-color:var(--gold);background:var(--s2);box-shadow:0 0 20px #c9a96e10}
 .col-head{padding:12px 14px 10px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .col-dot-label{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub)}
 .col-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .col-n{background:var(--s3);border:1px solid var(--border);border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700;color:var(--hint)}
-.col-body{overflow-y:auto;padding:0 6px 6px;display:flex;flex-direction:column;gap:5px;flex:1}
+.col-body{overflow-y:auto;padding:0 6px 6px;display:flex;flex-direction:column;gap:5px;flex:1;min-height:40px}
 .col-body::-webkit-scrollbar{width:2px}
 .col-body::-webkit-scrollbar-thumb{background:var(--hint);border-radius:2px}
-.kcard{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:12px 13px;cursor:pointer;transition:var(--t);position:relative}
+.kcard{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:12px 13px;cursor:grab;transition:var(--t);position:relative}
 .kcard:hover{background:var(--s3);border-color:var(--b3);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+.kcard.dragging{opacity:.4;transform:scale(.95)}
 .kcard-top{display:flex;align-items:center;gap:9px;margin-bottom:8px}
 .kcard-avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#fff}
 .kcard-name{font-size:12px;font-weight:600;line-height:1.2}
@@ -177,6 +317,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-s
 .sc-idle{background:var(--s4);color:var(--hint);border:1px solid var(--border)}
 .sc-pending{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-b)}
 .kcard-date{font-size:10px;color:var(--hint)}
+.kcard-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px}
+.kcard-tag{font-size:9px;padding:1px 6px;border-radius:10px;background:var(--purple-bg);color:var(--purple);border:1px solid #8b6cf620}
 
 /* LIST */
 #view-list .view-body{flex:1;overflow:auto;padding:0 22px 16px}
@@ -188,16 +330,21 @@ td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;vertic
 tr:last-child td{border-bottom:none}
 tbody tr{transition:var(--t)}
 tbody tr:hover td{background:var(--s1)}
+tbody tr.selected td{background:#c9a96e08}
 .avatar-sm{width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;vertical-align:middle;margin-right:8px}
 .name-cell{display:flex;align-items:center}
 .stage-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
 .cat-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--s3);border:1px solid var(--border);color:var(--sub)}
 .act-btn{background:transparent;border:none;cursor:pointer;color:var(--hint);font-size:13px;padding:4px 5px;border-radius:5px;transition:var(--t)}
 .act-btn:hover{color:var(--text);background:var(--s3)}
+.row-check{width:16px;height:16px;border-radius:4px;border:2px solid var(--b3);cursor:pointer;transition:var(--t);appearance:none;background:transparent;flex-shrink:0;vertical-align:middle}
+.row-check:checked{background:var(--gold);border-color:var(--gold)}
+.bulk-bar{display:flex;align-items:center;gap:10px;padding:10px 22px;background:var(--s2);border-bottom:1px solid var(--gold-b);flex-shrink:0}
+.bulk-bar .count{font-size:12px;font-weight:600;color:var(--gold)}
 
 /* MODALS */
 .overlay{position:fixed;inset:0;background:#000000bb;z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px)}
-.modal{background:var(--s1);border:1px solid var(--b2);border-radius:16px;width:680px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px #00000080}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:16px;width:720px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px #00000080}
 .modal-header{padding:22px 26px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-shrink:0}
 .modal-avatar{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
 .modal-hinfo{flex:1;min-width:0}
@@ -218,8 +365,6 @@ tbody tr:hover td{background:var(--s1)}
 .field input,.field select,.field textarea{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;transition:var(--t);width:100%}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);background:var(--s3);box-shadow:0 0 0 3px #c9a96e08}
 .field textarea{resize:vertical;min-height:60px;line-height:1.5}
-
-/* SEQUENCE */
 .seq-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r2);border:1px solid transparent;margin-bottom:4px;transition:var(--t)}
 .sr-done{background:var(--green-bg);border-color:var(--green-b)}
 .sr-active{background:var(--gold-bg);border-color:var(--gold-b)}
@@ -242,6 +387,15 @@ tbody tr:hover td{background:var(--s1)}
 .note-date{font-size:9px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 .note-text{font-size:12px;line-height:1.55;color:var(--text)}
 
+/* ACTIVITY LOG */
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.act-item{display:flex;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);transition:var(--t)}
+.act-item:hover{border-color:var(--b2)}
+.act-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--s3)}
+.act-info{flex:1;min-width:0}
+.act-info .lbl{font-size:11px;font-weight:600;margin-bottom:2px}
+.act-info .desc{font-size:10px;color:var(--sub)}
+
 /* IMPORT */
 #view-import .view-body{overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px;flex:1}
 .drop-zone{border:2px dashed var(--b2);border-radius:var(--r);padding:52px 24px;text-align:center;cursor:pointer;transition:var(--t);background:var(--s1)}
@@ -257,8 +411,6 @@ tbody tr:hover td{background:var(--s1)}
 .map-sel{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:7px 10px;color:var(--text);font-size:12px;font-family:inherit;width:100%;transition:var(--t)}
 .map-sel:focus{outline:none;border-color:var(--gold)}
 .preview-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--border);margin-top:2px}
-
-/* STATS */
 #view-stats .view-body{overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:14px;flex:1}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px}
@@ -271,8 +423,6 @@ tbody tr:hover td{background:var(--s1)}
 .sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .sum-lbl{font-size:9px;color:var(--hint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
 .sum-val{font-size:22px;font-weight:700;font-family:'Playfair Display',serif}
-
-/* SETTINGS */
 #view-settings .view-body{overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:16px;max-width:820px;flex:1}
 .set-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:20px}
 .set-card-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;margin-bottom:4px}
@@ -300,6 +450,15 @@ tbody tr:hover td{background:var(--s1)}
 .cat-tag button{background:none;border:none;cursor:pointer;color:var(--hint);font-size:11px;padding:0 2px;line-height:1;transition:var(--t)}
 .cat-tag button:hover{color:var(--red)}
 .danger-zone{border-color:var(--red-b)!important}
+
+/* TAGS INPUT */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:4px;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:6px 8px;min-height:36px;cursor:text;transition:var(--t)}
+.tags-wrap:focus-within{border-color:var(--gold);background:var(--s3)}
+.tag-chip{display:inline-flex;align-items:center;gap:4px;background:var(--purple-bg);border:1px solid #8b6cf620;color:var(--purple);padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.tag-chip button{background:none;border:none;color:var(--purple);cursor:pointer;font-size:10px;padding:0;line-height:1}
+.tag-chip button:hover{color:var(--red)}
+.tag-input{border:none;background:transparent;color:var(--text);font-size:12px;font-family:inherit;outline:none;min-width:80px;flex:1}
+.tag-input::placeholder{color:var(--hint)}
 
 /* TASKS */
 .task-header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--s1)}
@@ -358,12 +517,106 @@ tbody tr:hover td{background:var(--s1)}
 .focus-done-screen h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:8px}
 .focus-done-screen p{font-size:13px;color:var(--sub)}
 
+/* DUPLICATE WARNING */
+.dup-warn{background:var(--orange-bg);border:1px solid #f59e0b25;border-radius:var(--r2);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--orange)}
+
+/* SYNC INDICATOR */
+.sync-indicator{position:fixed;bottom:24px;left:24px;display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:10px;color:var(--sub);z-index:100;transition:var(--t)}
+.sync-dot{width:6px;height:6px;border-radius:50%;transition:var(--t)}
+.sync-ok .sync-dot{background:var(--green)}
+.sync-saving .sync-dot{background:var(--orange);animation:pulse 1s infinite}
+.sync-offline .sync-dot{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TUTO BOX */
+.tuto-box{margin:14px 22px 0;background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--gold-b);border-radius:var(--r);overflow:hidden;transition:var(--t)}
+.tuto-head{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;user-select:none}
+.tuto-head:hover{background:var(--gold-bg)}
+.tuto-icon{width:24px;height:24px;border-radius:50%;background:var(--gold-bg);border:1px solid var(--gold-b);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.tuto-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);flex:1}
+.tuto-arrow{font-size:11px;color:var(--gold);transition:var(--t)}
+.tuto-box.open .tuto-arrow{transform:rotate(180deg)}
+.tuto-body{padding:0 16px;max-height:0;overflow:hidden;transition:.3s ease;font-size:12px;color:var(--sub);line-height:1.6}
+.tuto-box.open .tuto-body{padding:4px 16px 14px;max-height:600px}
+.tuto-body strong{color:var(--text)}
+.tuto-body kbd{background:var(--s3);border:1px solid var(--b2);border-radius:4px;padding:1px 6px;font-size:10px;font-family:inherit;color:var(--gold)}
+.tuto-body ul{margin:6px 0 0 18px;padding:0}
+.tuto-body li{margin-bottom:3px}
+
+/* CALENDAR */
+#view-calendar .view-body{flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:14px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;text-transform:capitalize}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);width:32px;height:32px;color:var(--sub);cursor:pointer;font-family:inherit;font-size:13px;transition:var(--t)}
+.cal-nav button:hover{border-color:var(--gold);color:var(--gold)}
+.cal-grid{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day-name{padding:10px 6px;background:var(--s2);text-align:center;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--hint);border-bottom:1px solid var(--border)}
+.cal-day{min-height:90px;padding:8px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;transition:var(--t);position:relative;display:flex;flex-direction:column;gap:4px}
+.cal-day:hover{background:var(--s2)}
+.cal-day.other-month{opacity:.3;background:var(--s2)}
+.cal-day.today{background:var(--gold-bg)}
+.cal-day.today .cal-day-num{color:var(--gold);font-weight:700}
+.cal-day.selected{background:var(--gold-bg);box-shadow:inset 0 0 0 2px var(--gold)}
+.cal-day-num{font-size:12px;font-weight:600;color:var(--text)}
+.cal-day-events{display:flex;flex-direction:column;gap:2px;font-size:9px}
+.cal-event{background:var(--purple-bg);color:var(--purple);border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid #8b6cf620}
+.cal-event.rappel{background:var(--orange-bg);color:var(--orange);border-color:#f59e0b25}
+.cal-event.late{background:var(--red-bg);color:var(--red);border-color:var(--red-b)}
+.cal-day-detail{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.cal-day-detail h3{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;margin-bottom:12px}
+.cal-detail-list{display:flex;flex-direction:column;gap:6px}
+.cal-detail-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);cursor:pointer;transition:var(--t)}
+.cal-detail-item:hover{border-color:var(--b2);background:var(--s3)}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.tl-item{position:relative;padding-bottom:14px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;left:-19px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--s3);border:2px solid var(--gold);box-shadow:0 0 0 3px var(--bg)}
+.tl-dot.stage{border-color:var(--purple)}
+.tl-dot.note{border-color:var(--cyan)}
+.tl-dot.seq{border-color:var(--green)}
+.tl-dot.create{border-color:var(--gold)}
+.tl-content{font-size:12px}
+.tl-label{font-weight:600;color:var(--text)}
+.tl-date{font-size:10px;color:var(--hint);margin-top:2px}
+
+/* SCORE BAR */
+.score-bar{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700}
+.score-track{width:32px;height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
+.score-fill{height:4px;border-radius:2px;transition:.4s}
+.sf-low{background:var(--red)}
+.sf-mid{background:var(--orange)}
+.sf-high{background:var(--green)}
+.score-num{color:var(--sub);font-size:9px;min-width:18px}
+
+/* OBJECTIVES */
+.obj-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.obj-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11px}
+.obj-lbl{color:var(--sub)}
+.obj-val{color:var(--text);font-weight:600}
+.obj-bar{height:6px;background:var(--s4);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.obj-fill{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold-l));transition:.5s}
+.obj-fill.complete{background:linear-gradient(90deg,var(--green),#86efac)}
+
+/* TEMPLATES */
+.tpl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.tpl-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:12px}
+.tpl-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.tpl-name-input{flex:1;background:transparent;border:none;color:var(--text);font-weight:600;font-size:12px;font-family:inherit;outline:none}
+.tpl-type-sel{background:var(--s3);border:1px solid var(--b2);border-radius:4px;padding:3px 7px;color:var(--sub);font-size:10px;font-family:inherit}
+.tpl-content{width:100%;background:var(--s3);border:1px solid var(--b2);border-radius:var(--r2);padding:8px 10px;color:var(--text);font-size:11px;font-family:inherit;resize:vertical;min-height:50px;line-height:1.5}
+.tpl-content:focus{outline:none;border-color:var(--gold)}
+.tpl-vars{font-size:10px;color:var(--hint);margin-top:4px}
+.tpl-vars code{background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold);font-size:10px}
+
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;padding:10px 16px;border-radius:var(--r2);font-weight:600;font-size:12px;z-index:999;animation:up .22s ease;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px #00000060}
 .t-ok{background:var(--s3);border:1px solid var(--green-b);color:var(--green)}
 .t-err{background:var(--s3);border:1px solid var(--red-b);color:var(--red)}
 @keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--hint);border-radius:2px}
@@ -371,7 +624,7 @@ tbody tr:hover td{background:var(--s1)}
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-bg"></div>
   <div class="auth-card">
@@ -380,19 +633,22 @@ tbody tr:hover td{background:var(--s1)}
   </div>
 </div>
 
-<!-- APP -->
+<!-- SIDEBAR -->
 <div class="sidebar hidden" id="appSidebar">
   <div class="sb-logo">C</div>
   <div class="sb-sep"></div>
+  <div class="sb-item" onclick="nav('dashboard')" id="nb-dashboard"><span>&#9673;</span><div class="sb-tip">Dashboard</div></div>
   <div class="sb-item active" onclick="nav('kanban')" id="nb-kanban"><span>&#9776;</span><div class="sb-tip">Pipeline</div></div>
   <div class="sb-item" onclick="nav('list')" id="nb-list"><span>&#9874;</span><div class="sb-tip">Contacts</div></div>
   <div class="sb-item" onclick="nav('stats')" id="nb-stats"><span>&#9672;</span><div class="sb-tip">Statistiques</div></div>
   <div class="sb-item" onclick="nav('import')" id="nb-import"><span>&#8615;</span><div class="sb-tip">Import</div></div>
   <div class="sb-item" onclick="nav('tasks')" id="nb-tasks"><span>&#9889;</span><div class="sb-tip">Taches</div></div>
+  <div class="sb-item" onclick="nav('calendar')" id="nb-calendar"><span>&#9745;</span><div class="sb-tip">Calendrier</div></div>
   <div class="sb-sep sb-bottom"></div>
   <div class="sb-item" onclick="nav('settings')" id="nb-settings"><span>&#9881;</span><div class="sb-tip">Parametres</div></div>
 </div>
 
+<!-- MAIN -->
 <div class="main hidden" id="appMain">
   <div class="topbar">
     <div class="topbar-title" id="topTitle">Pipeline</div>
@@ -403,32 +659,50 @@ tbody tr:hover td{background:var(--s1)}
     </div>
     <button class="btn btn-ghost" onclick="exportCSV()">Export</button>
     <button class="btn btn-primary" onclick="openProspect(null)">+ Prospect</button>
-    <button class="btn btn-ghost btn-sm" onclick="doLogout()" id="logoutBtn" style="margin-left:4px;color:var(--hint);font-size:11px">Deconnexion</button>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="margin-left:4px;color:var(--hint);font-size:11px">Deconnexion</button>
   </div>
   <div class="kpi-strip" id="kpiStrip"></div>
   <div id="content">
+    <div class="view hidden" id="view-dashboard">
+      <div class="tuto-box" id="tuto-dashboard" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Dashboard</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vue d'ensemble de votre activite.</strong> Le Dashboard regroupe les informations essentielles : entonnoir de conversion, taches a venir, activite recente, prospects chauds et progression de vos objectifs mensuels.<ul><li>Cliquez sur n'importe quel element pour acceder au detail du prospect.</li><li>Le bouton <strong>Mode Focus</strong> lance l'enchainement automatique de vos taches.</li><li>Les <strong>objectifs mensuels</strong> se configurent dans Parametres.</li></ul></div></div>
+      <div class="view-body" style="overflow-y:auto;flex:1" id="dashBody"></div>
+    </div>
     <div class="view" id="view-kanban">
+      <div class="tuto-box" id="tuto-kanban" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Pipeline</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vue Kanban de vos prospects par etape.</strong><ul><li><strong>Glissez-deposez</strong> les cartes entre les colonnes pour changer leur etape.</li><li>Cliquez sur une carte pour <strong>editer le prospect</strong>.</li><li>Filtrez par <strong>profil</strong> ou <strong>priorite</strong> en haut.</li><li>Le point colore en haut a droite indique la priorite (rouge=chaud, orange=tiede, cyan=froid).</li><li>La barre de score sous l'avatar montre l'engagement (0-100).</li><li>Bouton <strong>Gerer le pipeline</strong> pour personnaliser etapes/sequence/profils.</li></ul></div></div>
       <div class="view-toolbar">
         <span class="vt-label">Filtrer</span>
         <select class="fsel" id="kbCat" onchange="renderKanban()"><option value="">Tous les profils</option></select>
+        <select class="fsel" id="kbPriority" onchange="renderKanban()"><option value="">Toutes priorites</option><option value="hot">Chaud</option><option value="warm">Tiede</option><option value="cold">Froid</option></select>
         <div class="vt-count" id="kbCount">0 prospects</div>
         <button class="btn btn-ghost btn-sm" onclick="openPipelineEditor()" style="margin-left:8px">Gerer le pipeline</button>
       </div>
       <div class="view-body" id="kanbanBody"></div>
     </div>
     <div class="view hidden" id="view-list">
-      <div class="view-toolbar">
+      <div class="tuto-box" id="tuto-list" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser les Contacts</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Liste complete et triable de vos prospects.</strong><ul><li>Cliquez sur un <strong>en-tete de colonne</strong> pour trier (clic a nouveau pour inverser).</li><li>Filtrez par <strong>etape, profil, priorite</strong> en haut.</li><li><strong>Cochez plusieurs prospects</strong> pour des actions groupees (changer etape, supprimer).</li><li>Le crayon edite, la croix supprime.</li><li>La colonne <strong>Seq.</strong> indique l'avancement de la sequence (J+x ou jours de retard).</li></ul></div></div>
+      <div class="view-toolbar" id="listToolbar">
         <span class="vt-label">Etape</span>
         <select class="fsel" id="lstStage" onchange="renderList()"><option value="">Toutes</option></select>
         <span class="vt-label">Profil</span>
         <select class="fsel" id="lstCat" onchange="renderList()"><option value="">Tous</option></select>
+        <span class="vt-label">Priorite</span>
+        <select class="fsel" id="lstPriority" onchange="renderList()"><option value="">Toutes</option><option value="hot">Chaud</option><option value="warm">Tiede</option><option value="cold">Froid</option></select>
         <div class="vt-count" id="lstCount">0</div>
+      </div>
+      <div id="bulkBar" class="bulk-bar hidden">
+        <span class="count" id="bulkCount">0 selectionnes</span>
+        <select class="fsel" id="bulkStage" style="font-size:11px"><option value="">Changer etape...</option></select>
+        <button class="btn btn-sm btn-primary" onclick="bulkChangeStage()">Appliquer</button>
+        <button class="btn btn-sm btn-danger" onclick="bulkDelete()">Supprimer</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-sm btn-ghost" onclick="clearSelection()">Annuler</button>
       </div>
       <div class="view-body" style="padding:0 22px 16px">
         <div class="tbl-wrap"><table><thead><tr id="listHead"></tr></thead><tbody id="listBody"></tbody></table></div>
       </div>
     </div>
     <div class="view hidden" id="view-import">
+      <div class="tuto-box" id="tuto-import" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment importer vos prospects</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Importez vos contacts depuis Excel ou CSV.</strong><ul><li>Glissez-deposez votre fichier <strong>.xlsx, .xls ou .csv</strong> dans la zone.</li><li><strong>Mappez les colonnes</strong> de votre fichier vers les champs du CRM (auto-detection).</li><li>Verifiez l'apercu, choisissez l'<strong>etape de depart</strong> et lancez l'import.</li><li>Cochez <strong>Ignorer doublons</strong> pour eviter les contacts deja presents (verifies par email/telephone).</li><li>La 1ere ligne du fichier doit contenir les <strong>en-tetes</strong> (Nom, Email, etc.).</li></ul></div></div>
       <div class="view-body">
         <div class="drop-zone" id="dz" onclick="document.getElementById('fi').click()">
           <div class="drop-icon">&#128194;</div>
@@ -441,18 +715,25 @@ tbody tr:hover td{background:var(--s1)}
       </div>
     </div>
     <div class="view hidden" id="view-tasks">
+      <div class="tuto-box" id="tuto-tasks" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment gerer vos taches</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Toutes les actions a faire dans les 3 prochains jours.</strong><ul><li>Les <strong>taches sequence</strong> proviennent de votre cadence de prospection (J+0, J+5...).</li><li>Les <strong>rappels</strong> programmes apparaissent avec une icone horloge.</li><li><strong>Cliquez sur la coche</strong> pour valider une tache.</li><li>Le <strong>Mode Focus</strong> vous fait enchainer les taches une par une, sans distraction.</li><li>Les badges colores indiquent l'urgence : <strong>rouge</strong>=retard, <strong>orange</strong>=aujourd'hui, <strong>or</strong>=a venir.</li></ul></div></div>
       <div class="view-body" id="tasksBody" style="overflow-y:auto;flex:1;padding:0"></div>
     </div>
+    <div class="view hidden" id="view-calendar">
+      <div class="tuto-box" id="tuto-calendar" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Calendrier</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vue mensuelle de vos rappels et taches sequence.</strong><ul><li>Les <strong>points colores</strong> sur les jours indiquent le nombre d'evenements (rappels, sequence).</li><li><strong>Cliquez sur un jour</strong> pour voir le detail des taches/rappels et les prospects concernes.</li><li>Naviguez entre les mois avec les fleches.</li><li>Le jour actuel est mis en surbrillance.</li></ul></div></div>
+      <div class="view-body" id="calendarBody"></div>
+    </div>
     <div class="view hidden" id="view-stats">
+      <div class="tuto-box" id="tuto-stats" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment lire les Statistiques</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Analyse complete de votre pipeline.</strong><ul><li><strong>Entonnoir de conversion :</strong> nombre de prospects ayant atteint chaque etape (cumulatif).</li><li><strong>Par etape/profil/source/priorite :</strong> repartition de votre base.</li><li><strong>Montant par etape :</strong> valeur monetaire (en milliers EUR) du pipeline.</li><li><strong>Sequence :</strong> nombre de prospects ayant valide chaque touchpoint.</li><li><strong>Vue globale :</strong> KPIs cles synthetiques.</li></ul></div></div>
       <div class="view-body"><div class="stats-grid" id="statsGrid"></div></div>
     </div>
     <div class="view hidden" id="view-settings">
+      <div class="tuto-box" id="tuto-settings" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment configurer le CRM</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Personnalisation et gestion du compte.</strong><ul><li><strong>Compte :</strong> mode cloud (sync multi-appareils) ou local.</li><li><strong>Pipeline :</strong> personnaliser etapes, sequence et profils.</li><li><strong>Objectifs :</strong> definir vos cibles mensuelles (nouveaux, signes, CA).</li><li><strong>Templates :</strong> emails/SMS reutilisables avec variables {prenom}, {nom}, {entreprise}.</li><li><strong>Raccourcis clavier :</strong> <kbd>1-8</kbd> navigation, <kbd>N</kbd> nouveau, <kbd>/</kbd> rechercher, <kbd>Esc</kbd> fermer.</li><li><strong>Sauvegarde :</strong> exporter/importer toutes vos donnees en JSON.</li></ul></div></div>
       <div class="view-body" id="settingsBody"></div>
     </div>
   </div>
 </div>
 
-<!-- FOCUS MODE -->
+<!-- FOCUS -->
 <div class="focus-overlay hidden" id="focusOverlay">
   <div style="position:relative;width:560px;max-width:100%">
     <div class="focus-close" onclick="closeFocusMode()">&#10005;</div>
@@ -478,7 +759,7 @@ tbody tr:hover td{background:var(--s1)}
         <div class="pe-tab" onclick="peTab('cats')" id="pet-cats">Profils</div>
       </div>
       <div id="pe-stages" style="padding:20px 24px">
-        <p style="color:var(--sub);font-size:12px;margin-bottom:16px">Couleur, nom de chaque etape. Modifications en temps reel.</p>
+        <p style="color:var(--sub);font-size:12px;margin-bottom:16px">Couleur, nom de chaque etape.</p>
         <div id="pe-stage-list"></div>
         <button class="btn btn-ghost btn-sm" onclick="peAddStage()" style="margin-top:8px">+ Ajouter une etape</button>
       </div>
@@ -488,10 +769,10 @@ tbody tr:hover td{background:var(--s1)}
         <button class="btn btn-ghost btn-sm" onclick="peAddSeq()" style="margin-top:8px">+ Ajouter un touchpoint</button>
       </div>
       <div id="pe-cats" class="hidden" style="padding:20px 24px">
-        <p style="color:var(--sub);font-size:12px;margin-bottom:14px">Categories de profils pour segmenter vos prospects.</p>
+        <p style="color:var(--sub);font-size:12px;margin-bottom:14px">Categories de profils.</p>
         <div class="cat-tags" id="pe-cat-tags"></div>
         <div style="display:flex;gap:8px">
-          <input id="peNewCat" placeholder="Ex : Chef d'entreprise, Salarie..." style="flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:7px 11px;color:var(--text);font-family:inherit;font-size:13px" onkeydown="if(event.key==='Enter')peAddCat()">
+          <input id="peNewCat" placeholder="Nouveau profil..." style="flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:7px 11px;color:var(--text);font-family:inherit;font-size:13px" onkeydown="if(event.key==='Enter')peAddCat()">
           <button class="btn btn-primary btn-sm" onclick="peAddCat()">+ Ajouter</button>
         </div>
       </div>
@@ -520,522 +801,1355 @@ tbody tr:hover td{background:var(--s1)}
   </div>
 </div>
 
+<!-- SYNC INDICATOR -->
+<div class="sync-indicator sync-ok" id="syncIndicator" style="display:none">
+  <div class="sync-dot"></div>
+  <span id="syncText">Synchronise</span>
+</div>
+
 <script>
-// ── AUTH SYSTEM ──
-const Auth={
-  hash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return'h_'+Math.abs(h).toString(36)},
-  getUsers(){return JSON.parse(localStorage.getItem('crm_users')||'[]')},
-  saveUsers(u){localStorage.setItem('crm_users',JSON.stringify(u))},
-  register(name,email,pwd){
-    const users=this.getUsers();
-    if(users.find(u=>u.email===email.toLowerCase()))return{ok:false,msg:'Cet email est deja utilise.'};
-    if(pwd.length<4)return{ok:false,msg:'Le mot de passe doit contenir au moins 4 caracteres.'};
-    const user={id:'u_'+Date.now(),name:name.trim(),email:email.toLowerCase().trim(),pwd:this.hash(pwd),created:new Date().toISOString()};
-    users.push(user);this.saveUsers(users);return{ok:true,user};
-  },
-  login(email,pwd){
-    const users=this.getUsers();
-    const u=users.find(x=>x.email===email.toLowerCase().trim());
-    if(!u)return{ok:false,msg:'Aucun compte trouve avec cet email.'};
-    if(u.pwd!==this.hash(pwd))return{ok:false,msg:'Mot de passe incorrect.'};
-    return{ok:true,user:u};
-  },
-  resetPwd(email,newPwd){
-    const users=this.getUsers();
-    const u=users.find(x=>x.email===email.toLowerCase().trim());
-    if(!u)return{ok:false,msg:'Aucun compte trouve avec cet email.'};
-    if(newPwd.length<4)return{ok:false,msg:'Le mot de passe doit contenir au moins 4 caracteres.'};
-    u.pwd=this.hash(newPwd);this.saveUsers(users);return{ok:true};
-  },
-  setSession(user){localStorage.setItem('crm_session',JSON.stringify(user))},
-  getSession(){const s=localStorage.getItem('crm_session');return s?JSON.parse(s):null},
-  logout(){localStorage.removeItem('crm_session')}
+// =============================================
+// FIREBASE CONFIG
+// =============================================
+// INSTRUCTIONS: Remplace cette config par la tienne
+// 1. Va sur https://console.firebase.google.com
+// 2. Cree un projet (gratuit)
+// 3. Active Authentication > Email/Password
+// 4. Active Firestore Database (mode test)
+// 5. Va dans Project Settings > General > Your apps > Web
+// 6. Copie la config firebaseConfig ci-dessous
+const firebaseConfig = {
+  apiKey: "AIzaSyAKuCU7DQyPlUVvccAzx-3ujjE9iKJTBxs",
+  authDomain: "crm-v1-ca26a.firebaseapp.com",
+  projectId: "crm-v1-ca26a",
+  storageBucket: "crm-v1-ca26a.firebasestorage.app",
+  messagingSenderId: "1081109530700",
+  appId: "1:1081109530700:web:e04cc7e7e5465041268ce9",
+  measurementId: "G-62B85R7DJM"
 };
 
-let currentUser=null;
+let useFirebase = false;
+let db = null;
+let firebaseAuth = null;
 
-function showAuth(mode='login'){
-  const c=document.getElementById('authContent');
-  if(mode==='login'){
-    c.innerHTML=`
-      <div class="auth-title">Bienvenue</div>
-      <div class="auth-sub">Connectez-vous a votre espace</div>
-      <div class="auth-error" id="authErr"></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="aEmail" placeholder="votre@email.com"></div>
-      <div class="auth-field"><label>Mot de passe</label><input type="password" id="aPwd" placeholder="Votre mot de passe"></div>
-      <button class="auth-btn" onclick="doLogin()">Se connecter</button>
-      <div class="auth-link" onclick="showAuth('forgot')">Mot de passe oublie ?</div>
-      <div class="auth-sep">ou</div>
-      <div class="auth-link" onclick="showAuth('register')">Pas encore de compte ? <span>Creer un compte</span></div>`;
-    setTimeout(()=>document.getElementById('aEmail')?.focus(),100);
-  } else if(mode==='register'){
-    c.innerHTML=`
-      <div class="auth-title">Creer un compte</div>
-      <div class="auth-sub">Rejoignez l'espace de prospection</div>
-      <div class="auth-error" id="authErr"></div>
-      <div class="auth-field"><label>Nom complet</label><input id="aName" placeholder="Votre nom"></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="aEmail" placeholder="votre@email.com"></div>
-      <div class="auth-field"><label>Mot de passe</label><input type="password" id="aPwd" placeholder="Minimum 4 caracteres"></div>
-      <button class="auth-btn" onclick="doRegister()">Creer mon compte</button>
-      <div class="auth-sep">ou</div>
-      <div class="auth-link" onclick="showAuth('login')">Deja un compte ? <span>Se connecter</span></div>`;
-    setTimeout(()=>document.getElementById('aName')?.focus(),100);
-  } else if(mode==='forgot'){
-    c.innerHTML=`
-      <div class="auth-title">Reinitialiser</div>
-      <div class="auth-sub">Entrez votre email et un nouveau mot de passe</div>
-      <div class="auth-error" id="authErr"></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="aEmail" placeholder="votre@email.com"></div>
-      <div class="auth-field"><label>Nouveau mot de passe</label><input type="password" id="aNewPwd" placeholder="Minimum 4 caracteres"></div>
-      <button class="auth-btn" onclick="doReset()">Reinitialiser</button>
-      <div class="auth-sep">ou</div>
-      <div class="auth-link" onclick="showAuth('login')"><span>Retour a la connexion</span></div>`;
+try {
+  if (firebaseConfig.apiKey !== "REMPLACE_MOI") {
+    firebase.initializeApp(firebaseConfig);
+    firebaseAuth = firebase.auth();
+    db = firebase.firestore();
+    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    useFirebase = true;
+  }
+} catch (e) {
+  console.warn('Firebase non configure, mode local actif.', e);
+}
+
+// =============================================
+// SYNC ENGINE - Works with Firebase OR localStorage
+// =============================================
+const Sync = {
+  _saving: false,
+  _queue: null,
+
+  async saveProspects() {
+    if (!useFirebase || !currentUser) {
+      localStorage.setItem(userKey('data'), JSON.stringify(prospects));
+      localStorage.setItem(userKey('cid'), String(currentId));
+      return;
+    }
+    this._queue = { prospects: [...prospects], cid: currentId };
+    if (this._saving) return;
+    this._saving = true;
+    setSyncState('saving');
+    while (this._queue) {
+      const data = this._queue;
+      this._queue = null;
+      try {
+        const batch = db.batch();
+        const ref = db.collection('users').doc(currentUser.uid).collection('prospects');
+        // Save as chunks to avoid 1MB limit
+        const chunkSize = 200;
+        for (let i = 0; i < data.prospects.length; i += chunkSize) {
+          const chunk = data.prospects.slice(i, i + chunkSize);
+          batch.set(ref.doc('chunk_' + i), { data: JSON.stringify(chunk), idx: i });
+        }
+        batch.set(db.collection('users').doc(currentUser.uid), {
+          config: JSON.stringify({ stages: STAGES, seq: SEQ, cats: CATS }),
+          cid: data.cid,
+          totalProspects: data.prospects.length,
+          lastSync: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        await batch.commit();
+      } catch (e) {
+        console.error('Sync error:', e);
+        // Fallback local
+        localStorage.setItem(userKey('data'), JSON.stringify(prospects));
+        localStorage.setItem(userKey('cid'), String(currentId));
+        setSyncState('offline');
+        this._saving = false;
+        return;
+      }
+    }
+    setSyncState('ok');
+    this._saving = false;
+  },
+
+  async loadProspects() {
+    if (!useFirebase || !currentUser) {
+      const d = localStorage.getItem(userKey('data'));
+      prospects = d ? JSON.parse(d) : [];
+      const i = localStorage.getItem(userKey('cid'));
+      currentId = i ? parseInt(i) : 0;
+      return;
+    }
+    try {
+      setSyncState('saving');
+      const userDoc = await db.collection('users').doc(currentUser.uid).get();
+      if (userDoc.exists) {
+        const ud = userDoc.data();
+        currentId = ud.cid || 0;
+        if (ud.config) {
+          const cfg = JSON.parse(ud.config);
+          if (cfg.stages) STAGES = cfg.stages;
+          if (cfg.seq) SEQ = cfg.seq;
+          if (cfg.cats) CATS = cfg.cats;
+        }
+      }
+      const chunks = await db.collection('users').doc(currentUser.uid).collection('prospects').orderBy('idx').get();
+      prospects = [];
+      chunks.forEach(doc => {
+        const chunk = JSON.parse(doc.data().data);
+        prospects.push(...chunk);
+      });
+      setSyncState('ok');
+    } catch (e) {
+      console.error('Load error:', e);
+      const d = localStorage.getItem(userKey('data'));
+      prospects = d ? JSON.parse(d) : [];
+      const i = localStorage.getItem(userKey('cid'));
+      currentId = i ? parseInt(i) : 0;
+      setSyncState('offline');
+    }
+  },
+
+  async saveConfig() {
+    if (!useFirebase || !currentUser) {
+      localStorage.setItem(userKey('cfg'), JSON.stringify({ stages: STAGES, seq: SEQ, cats: CATS }));
+      return;
+    }
+    try {
+      await db.collection('users').doc(currentUser.uid).set({
+        config: JSON.stringify({ stages: STAGES, seq: SEQ, cats: CATS })
+      }, { merge: true });
+    } catch (e) {
+      localStorage.setItem(userKey('cfg'), JSON.stringify({ stages: STAGES, seq: SEQ, cats: CATS }));
+    }
+  }
+};
+
+function setSyncState(state) {
+  const el = document.getElementById('syncIndicator');
+  if (!useFirebase) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  el.className = 'sync-indicator sync-' + state;
+  const txt = document.getElementById('syncText');
+  if (state === 'ok') txt.textContent = 'Synchronise';
+  else if (state === 'saving') txt.textContent = 'Sauvegarde...';
+  else txt.textContent = 'Hors ligne';
+}
+
+// =============================================
+// AUTH (Firebase or Local)
+// =============================================
+let currentUser = null;
+
+function showAuth(mode = 'login') {
+  const c = document.getElementById('authContent');
+  if (mode === 'login') {
+    c.innerHTML = `<div class="auth-title">Bienvenue</div><div class="auth-sub">Connectez-vous a votre espace</div><div class="auth-error" id="authErr"></div><div class="auth-loader" id="authLoad">Connexion en cours...</div><div class="auth-field"><label>Email</label><input type="email" id="aEmail" placeholder="votre@email.com"></div><div class="auth-field"><label>Mot de passe</label><input type="password" id="aPwd" placeholder="Votre mot de passe"></div><button class="auth-btn" id="authBtn" onclick="doLogin()">Se connecter</button><div class="auth-link" onclick="showAuth('forgot')">Mot de passe oublie ?</div><div class="auth-sep">ou</div><div class="auth-link" onclick="showAuth('register')">Pas encore de compte ? <span>Creer un compte</span></div>`;
+    setTimeout(() => document.getElementById('aEmail')?.focus(), 100);
+  } else if (mode === 'register') {
+    c.innerHTML = `<div class="auth-title">Creer un compte</div><div class="auth-sub">Rejoignez l'espace de prospection</div><div class="auth-error" id="authErr"></div><div class="auth-loader" id="authLoad">Creation en cours...</div><div class="auth-field"><label>Nom complet</label><input id="aName" placeholder="Votre nom"></div><div class="auth-field"><label>Email</label><input type="email" id="aEmail" placeholder="votre@email.com"></div><div class="auth-field"><label>Mot de passe</label><input type="password" id="aPwd" placeholder="Minimum 6 caracteres"></div><button class="auth-btn" id="authBtn" onclick="doRegister()">Creer mon compte</button><div class="auth-sep">ou</div><div class="auth-link" onclick="showAuth('login')">Deja un compte ? <span>Se connecter</span></div>`;
+    setTimeout(() => document.getElementById('aName')?.focus(), 100);
+  } else {
+    c.innerHTML = `<div class="auth-title">Reinitialiser</div><div class="auth-sub">Entrez votre email pour recevoir un lien de reinitialisation</div><div class="auth-error" id="authErr"></div><div class="auth-loader" id="authLoad">Envoi en cours...</div><div class="auth-field"><label>Email</label><input type="email" id="aEmail" placeholder="votre@email.com"></div><button class="auth-btn" id="authBtn" onclick="doReset()">Reinitialiser</button><div class="auth-sep">ou</div><div class="auth-link" onclick="showAuth('login')"><span>Retour a la connexion</span></div>`;
   }
 }
 
-function authErr(msg){const e=document.getElementById('authErr');if(e){e.textContent=msg;e.style.display='block';}}
+function authErr(msg) {
+  const e = document.getElementById('authErr');
+  if (e) { e.textContent = msg; e.style.display = 'block'; }
+  const l = document.getElementById('authLoad');
+  if (l) l.style.display = 'none';
+  const b = document.getElementById('authBtn');
+  if (b) b.disabled = false;
+}
+function authLoading() {
+  const l = document.getElementById('authLoad');
+  if (l) l.style.display = 'block';
+  const b = document.getElementById('authBtn');
+  if (b) b.disabled = true;
+  const e = document.getElementById('authErr');
+  if (e) e.style.display = 'none';
+}
 
-function doLogin(){
-  const email=document.getElementById('aEmail')?.value||'';
-  const pwd=document.getElementById('aPwd')?.value||'';
-  if(!email||!pwd)return authErr('Veuillez remplir tous les champs.');
-  const r=Auth.login(email,pwd);
-  if(!r.ok)return authErr(r.msg);
-  Auth.setSession(r.user);startApp(r.user);
+async function doLogin() {
+  const email = document.getElementById('aEmail')?.value || '';
+  const pwd = document.getElementById('aPwd')?.value || '';
+  if (!email || !pwd) return authErr('Remplissez tous les champs.');
+  authLoading();
+  if (useFirebase) {
+    try {
+      const result = await firebaseAuth.signInWithEmailAndPassword(email, pwd);
+      await startApp({ uid: result.user.uid, email: result.user.email, name: result.user.displayName || email.split('@')[0] });
+    } catch (e) {
+      const msgs = { 'auth/user-not-found': 'Aucun compte avec cet email.', 'auth/wrong-password': 'Mot de passe incorrect.', 'auth/invalid-email': 'Email invalide.', 'auth/invalid-credential': 'Email ou mot de passe incorrect.' };
+      authErr(msgs[e.code] || e.message);
+    }
+  } else {
+    const users = JSON.parse(localStorage.getItem('crm_users') || '[]');
+    const u = users.find(x => x.email === email.toLowerCase().trim());
+    if (!u) return authErr('Aucun compte avec cet email.');
+    if (u.pwd !== hashLocal(pwd)) return authErr('Mot de passe incorrect.');
+    localStorage.setItem('crm_session', JSON.stringify(u));
+    await startApp(u);
+  }
 }
-function doRegister(){
-  const name=document.getElementById('aName')?.value||'';
-  const email=document.getElementById('aEmail')?.value||'';
-  const pwd=document.getElementById('aPwd')?.value||'';
-  if(!name||!email||!pwd)return authErr('Veuillez remplir tous les champs.');
-  const r=Auth.register(name,email,pwd);
-  if(!r.ok)return authErr(r.msg);
-  Auth.setSession(r.user);startApp(r.user);
+
+async function doRegister() {
+  const name = document.getElementById('aName')?.value || '';
+  const email = document.getElementById('aEmail')?.value || '';
+  const pwd = document.getElementById('aPwd')?.value || '';
+  if (!name || !email || !pwd) return authErr('Remplissez tous les champs.');
+  if (pwd.length < 4) return authErr('Minimum 4 caracteres.');
+  authLoading();
+  if (useFirebase) {
+    try {
+      const result = await firebaseAuth.createUserWithEmailAndPassword(email, pwd);
+      await result.user.updateProfile({ displayName: name });
+      await db.collection('users').doc(result.user.uid).set({ name, email, created: new Date().toISOString() }, { merge: true });
+      await startApp({ uid: result.user.uid, email, name });
+    } catch (e) {
+      const msgs = { 'auth/email-already-in-use': 'Cet email est deja utilise.', 'auth/weak-password': 'Mot de passe trop faible (min 6 car.).', 'auth/invalid-email': 'Email invalide.' };
+      authErr(msgs[e.code] || e.message);
+    }
+  } else {
+    const users = JSON.parse(localStorage.getItem('crm_users') || '[]');
+    if (users.find(u => u.email === email.toLowerCase())) return authErr('Cet email est deja utilise.');
+    const user = { id: 'u_' + Date.now(), uid: 'u_' + Date.now(), name: name.trim(), email: email.toLowerCase().trim(), pwd: hashLocal(pwd), created: new Date().toISOString() };
+    users.push(user);
+    localStorage.setItem('crm_users', JSON.stringify(users));
+    localStorage.setItem('crm_session', JSON.stringify(user));
+    await startApp(user);
+  }
 }
-function doReset(){
-  const email=document.getElementById('aEmail')?.value||'';
-  const newPwd=document.getElementById('aNewPwd')?.value||'';
-  if(!email||!newPwd)return authErr('Veuillez remplir tous les champs.');
-  const r=Auth.resetPwd(email,newPwd);
-  if(!r.ok)return authErr(r.msg);
+
+async function doReset() {
+  const email = document.getElementById('aEmail')?.value || '';
+  if (!email) return authErr('Entrez votre email.');
+  authLoading();
+  if (useFirebase) {
+    try {
+      await firebaseAuth.sendPasswordResetEmail(email);
+      showAuth('login');
+      setTimeout(() => toast('Email de reinitialisation envoye', 'ok'), 200);
+    } catch (e) {
+      authErr(e.code === 'auth/user-not-found' ? 'Aucun compte avec cet email.' : e.message);
+    }
+  } else {
+    const newPwd = prompt('Nouveau mot de passe (mode local) :');
+    if (!newPwd || newPwd.length < 4) return authErr('Minimum 4 caracteres.');
+    const users = JSON.parse(localStorage.getItem('crm_users') || '[]');
+    const u = users.find(x => x.email === email.toLowerCase().trim());
+    if (!u) return authErr('Aucun compte avec cet email.');
+    u.pwd = hashLocal(newPwd);
+    localStorage.setItem('crm_users', JSON.stringify(users));
+    showAuth('login');
+    setTimeout(() => toast('Mot de passe reinitialise', 'ok'), 200);
+  }
+}
+
+function doLogout() {
+  if (useFirebase) firebaseAuth.signOut();
+  else localStorage.removeItem('crm_session');
+  currentUser = null;
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('appSidebar').classList.add('hidden');
+  document.getElementById('appMain').classList.add('hidden');
+  document.getElementById('syncIndicator').style.display = 'none';
   showAuth('login');
-  setTimeout(()=>toast('Mot de passe reinitialise','ok'),200);
 }
-function doLogout(){Auth.logout();currentUser=null;document.getElementById('authScreen').classList.remove('hidden');document.getElementById('appSidebar').classList.add('hidden');document.getElementById('appMain').classList.add('hidden');showAuth('login');}
 
-// Enter key on auth fields
-document.addEventListener('keydown',e=>{
-  if(e.key!=='Enter')return;
-  const t=e.target;if(!t||!t.closest||!t.closest('.auth-card'))return;
-  const btn=document.querySelector('.auth-btn');if(btn)btn.click();
+function hashLocal(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = ((h << 5) - h) + s.charCodeAt(i); h |= 0; }
+  return 'h_' + Math.abs(h).toString(36);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target?.closest?.('.auth-card')) {
+    const b = document.querySelector('.auth-btn');
+    if (b && !b.disabled) b.click();
+  }
 });
 
-// ── APP DATA (scoped per user) ──
-let STAGES,SEQ,CATS,prospects,currentId,sortField,sortAsc,currentTab;
+// =============================================
+// DATA (scoped per user)
+// =============================================
+let STAGES, SEQ, CATS, prospects, currentId, sortField, sortAsc, currentTab;
+let selectedIds = new Set();
 
-function userKey(k){return currentUser?`${currentUser.id}_${k}`:k;}
-function load(){const d=localStorage.getItem(userKey('data'));prospects=d?JSON.parse(d):[];const i=localStorage.getItem(userKey('cid'));currentId=i?parseInt(i):0;}
-function save(){localStorage.setItem(userKey('data'),JSON.stringify(prospects));localStorage.setItem(userKey('cid'),String(currentId));}
-function saveConfig(){localStorage.setItem(userKey('cfg'),JSON.stringify({stages:STAGES,seq:SEQ,cats:CATS}));}
-function loadConfig(){
-  STAGES=[{id:0,label:'Nouveau',color:'#c9a96e'},{id:1,label:'Contacte',color:'#8b6cf6'},{id:2,label:'Relance',color:'#f59e0b'},{id:3,label:'RDV Fixe',color:'#f97316'},{id:4,label:'Proposition',color:'#22d3ee'},{id:5,label:'Signe',color:'#4ade80'},{id:6,label:'Perdu',color:'#ef4444'}];
-  SEQ=[{day:0,type:'email',icon:'M',label:'Email #1 - Accroche',desc:'Audit social offert'},{day:5,type:'email',icon:'M',label:'Email #2 - Valeur',desc:'Cas concret confrere'},{day:10,type:'linkedin',icon:'L',label:'LinkedIn',desc:'Connexion + message'},{day:14,type:'email',icon:'M',label:'Email #3 - Action',desc:'Lien Calendly'},{day:19,type:'sms',icon:'S',label:'SMS',desc:'Message court'},{day:25,type:'email',icon:'M',label:'Email #4 - Break-up',desc:'Fermeture bienveillante'}];
-  CATS=['Medecin liberal','Chirurgien','Dentiste','Chef d\'entreprise','Profession liberale','Salarie cadre','Dirigeant TNS','Investisseur prive','Retraite','Autre'];
-  const c=localStorage.getItem(userKey('cfg'));
-  if(c){const d=JSON.parse(c);if(d.stages)STAGES=d.stages;if(d.seq)SEQ=d.seq;if(d.cats)CATS=d.cats;}
+function userKey(k) { return currentUser ? `${currentUser.uid || currentUser.id}_${k}` : k; }
+
+function save() {
+  // Also save locally for offline access
+  localStorage.setItem(userKey('data'), JSON.stringify(prospects));
+  localStorage.setItem(userKey('cid'), String(currentId));
+  Sync.saveProspects();
+}
+function saveConfig() {
+  localStorage.setItem(userKey('cfg'), JSON.stringify({ stages: STAGES, seq: SEQ, cats: CATS }));
+  Sync.saveConfig();
 }
 
-function startApp(user){
-  currentUser=user;sortField='lastName';sortAsc=true;currentTab='kanban';
+function loadConfig() {
+  STAGES = [{ id: 0, label: 'Nouveau', color: '#c9a96e' }, { id: 1, label: 'Contacte', color: '#8b6cf6' }, { id: 2, label: 'Relance', color: '#f59e0b' }, { id: 3, label: 'RDV Fixe', color: '#f97316' }, { id: 4, label: 'Proposition', color: '#22d3ee' }, { id: 5, label: 'Signe', color: '#4ade80' }, { id: 6, label: 'Perdu', color: '#ef4444' }];
+  SEQ = [{ day: 0, type: 'email', icon: 'M', label: 'Email #1 - Accroche', desc: 'Audit social offert' }, { day: 5, type: 'email', icon: 'M', label: 'Email #2 - Valeur', desc: 'Cas concret confrere' }, { day: 10, type: 'linkedin', icon: 'L', label: 'LinkedIn', desc: 'Connexion + message' }, { day: 14, type: 'email', icon: 'M', label: 'Email #3 - Action', desc: 'Lien Calendly' }, { day: 19, type: 'sms', icon: 'S', label: 'SMS', desc: 'Message court' }, { day: 25, type: 'email', icon: 'M', label: 'Email #4 - Break-up', desc: 'Fermeture bienveillante' }];
+  CATS = ['Medecin liberal', 'Chirurgien', 'Dentiste', 'Chef d\'entreprise', 'Profession liberale', 'Salarie cadre', 'Dirigeant TNS', 'Investisseur prive', 'Retraite', 'Autre'];
+  const c = localStorage.getItem(userKey('cfg'));
+  if (c) { const d = JSON.parse(c); if (d.stages) STAGES = d.stages; if (d.seq) SEQ = d.seq; if (d.cats) CATS = d.cats; }
+}
+
+async function startApp(user) {
+  currentUser = user;
+  sortField = 'lastName'; sortAsc = true; currentTab = 'dashboard'; selectedIds = new Set();
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appSidebar').classList.remove('hidden');
   document.getElementById('appMain').classList.remove('hidden');
-  const logo=document.querySelector('.sb-logo');if(logo)logo.textContent=(user.name||'C')[0].toUpperCase();
-  loadConfig();load();initImport();
-  document.getElementById('searchInput').addEventListener('input',()=>renderAll());
-  renderAll();
+  const logo = document.querySelector('.sb-logo');
+  if (logo) logo.textContent = (user.name || 'C')[0].toUpperCase();
+  loadConfig();
+  await Sync.loadProspects();
+  initImport();
+  document.getElementById('searchInput').addEventListener('input', () => renderAll());
+  nav('dashboard');
+  // Keyboard shortcuts
+  document.addEventListener('keydown', handleShortcuts);
+  // Notifications
+  requestNotifPermission();
+  checkLateNotifs();
+  setInterval(checkLateNotifs, 30 * 60 * 1000);
 }
 
-function uid(){currentId=(currentId||0)+1;save();return currentId;}
-function today(){return new Date().toISOString().split('T')[0];}
-function addDays(ds,n){if(!ds)return null;const d=new Date(ds);d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
-function fmtDate(d){if(!d)return '\u2014';return new Date(d).toLocaleDateString('fr-FR');}
-function daysFromNow(ds){if(!ds)return null;return Math.floor((new Date(ds)-Date.now())/86400000);}
-function getSeq(p){if(!p.contactDate)return{step:-1,dueDate:null,days:null};const done=p.seqDone||[];for(let i=0;i<SEQ.length;i++){if(!done.includes(i)){const due=addDays(p.contactDate,SEQ[i].day);return{step:i,dueDate:due,days:daysFromNow(due)};}}return{step:-1,dueDate:null,days:null};}
-function avatarColor(str){const colors=['#c9a96e','#8b6cf6','#22d3ee','#f97316','#4ade80','#f59e0b','#ef4444','#ec4899'];let h=0;for(const c of(str||'?'))h=(h*31+c.charCodeAt(0))&0xffffffff;return colors[Math.abs(h)%colors.length];}
-function initials(p){return((p.firstName||'?')[0]+(p.lastName||'?')[0]).toUpperCase();}
-function match(p,q){if(!q)return true;q=q.toLowerCase();return['firstName','lastName','email','phone','city','category'].some(f=>(p[f]||'').toLowerCase().includes(q));}
-
-function renderKPI(){
-  const tot=prospects.length,sig=prospects.filter(p=>p.stage===5).length;
-  const rdv=prospects.filter(p=>p.stage>=3&&p.stage!==6).length;
-  const late=prospects.filter(p=>{const s=getSeq(p);return s.step>=0&&s.days!==null&&s.days<0;}).length;
-  const conv=tot?Math.round(sig/tot*100):0;
-  document.getElementById('kpiStrip').innerHTML=[
-    {lbl:'Prospects',val:tot,delta:'Total',cls:'kd-gold'},
-    {lbl:'En cours',val:prospects.filter(p=>p.stage<5&&p.stage!==6).length,delta:'Actifs',cls:'kd-gold'},
-    {lbl:'RDV & +',val:rdv,delta:'Etape 3+',cls:'kd-orange'},
-    {lbl:'Signes',val:sig,delta:conv+'%',cls:'kd-green'},
-    {lbl:'En retard',val:late,delta:'A relancer',cls:late>0?'kd-red':'kd-gold'},
-  ].map(k=>`<div class="kpi-item"><div class="kpi-lbl">${k.lbl}</div><div class="kpi-row"><div class="kpi-val">${k.val}</div><div class="kpi-delta ${k.cls}">${k.delta}</div></div></div>`).join('');
+// =============================================
+// KEYBOARD SHORTCUTS
+// =============================================
+function handleShortcuts(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.ctrlKey || e.metaKey) return;
+  const map = { '1': 'dashboard', '2': 'kanban', '3': 'list', '4': 'tasks', '5': 'calendar', '6': 'stats', '7': 'import', '8': 'settings' };
+  if (map[e.key]) { e.preventDefault(); nav(map[e.key]); }
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); openProspect(null); }
+  if (e.key === '/') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+  if (e.key === 'Escape') {
+    closeModal();
+    closePipelineEditor();
+    closeFocusMode();
+  }
 }
 
-function renderKanban(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  const kbSel=document.getElementById('kbCat');const curVal=kbSel.value;
-  kbSel.innerHTML=`<option value="">Tous les profils</option>`+CATS.map(c=>`<option ${c===curVal?'selected':''}>${c}</option>`).join('');
-  const cat=kbSel.value;let visible=0;
-  document.getElementById('kanbanBody').innerHTML=STAGES.map(st=>{
-    const cards=prospects.filter(p=>p.stage===st.id&&match(p,q)&&(!cat||p.category===cat));
-    visible+=cards.length;
-    return`<div class="col"><div class="col-head"><div class="col-dot-label"><div class="col-dot" style="background:${st.color}"></div>${st.label}</div><div class="col-n">${cards.length}</div></div><div class="col-body">${cards.map(p=>kCard(p)).join('')}<div style="height:4px"></div></div></div>`;
+// =============================================
+// UTILS
+// =============================================
+function uid() { currentId = (currentId || 0) + 1; save(); return currentId; }
+function today() { return new Date().toISOString().split('T')[0]; }
+function nowISO() { return new Date().toISOString(); }
+function addDays(ds, n) { if (!ds) return null; const d = new Date(ds); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; }
+function fmtDate(d) { if (!d) return '\u2014'; return new Date(d).toLocaleDateString('fr-FR'); }
+function fmtDateTime(d) { if (!d) return '\u2014'; return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+function daysFromNow(ds) { if (!ds) return null; return Math.floor((new Date(ds) - Date.now()) / 86400000); }
+function getSeq(p) { if (!p.contactDate) return { step: -1, dueDate: null, days: null }; const done = p.seqDone || []; for (let i = 0; i < SEQ.length; i++) { if (!done.includes(i)) { const due = addDays(p.contactDate, SEQ[i].day); return { step: i, dueDate: due, days: daysFromNow(due) }; } } return { step: -1, dueDate: null, days: null }; }
+function avatarColor(str) { const colors = ['#c9a96e', '#8b6cf6', '#22d3ee', '#f97316', '#4ade80', '#f59e0b', '#ef4444', '#ec4899']; let h = 0; for (const c of (str || '?')) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff; return colors[Math.abs(h) % colors.length]; }
+function initials(p) { return ((p.firstName || '?')[0] + (p.lastName || '?')[0]).toUpperCase(); }
+function match(p, q) { if (!q) return true; q = q.toLowerCase(); return ['firstName', 'lastName', 'email', 'phone', 'city', 'category', 'address', 'linkedin', 'source'].some(f => (p[f] || '').toLowerCase().includes(q)) || (p.tags || []).some(t => t.toLowerCase().includes(q)) || (p.notes || []).some(n => n.text.toLowerCase().includes(q)); }
+function findDuplicates(email, phone, excludeId) {
+  if (!email && !phone) return [];
+  return prospects.filter(p => p.id !== excludeId && ((email && p.email && p.email.toLowerCase() === email.toLowerCase()) || (phone && p.phone && p.phone === phone)));
+}
+
+function logActivity(p, type, detail) {
+  if (!p.activity) p.activity = [];
+  p.activity.push({ type, detail, date: nowISO() });
+  if (p.activity.length > 50) p.activity = p.activity.slice(-50);
+  p.lastInteraction = nowISO();
+}
+
+// =============================================
+// AUTO-SCORING (0-100)
+// =============================================
+function calcScore(p) {
+  let score = 0;
+  if (p.email) score += 10;
+  if (p.phone) score += 10;
+  if (p.contactDate) score += 10;
+  const seqDone = (p.seqDone || []).length;
+  const seqTotal = SEQ.length || 1;
+  score += Math.round((seqDone / seqTotal) * 20);
+  if (p.priority === 'hot') score += 15;
+  else if (p.priority === 'warm') score += 10;
+  else if (p.priority === 'cold') score += 5;
+  if (p.amount && parseFloat(p.amount) > 0) score += 10;
+  score += Math.min((p.notes || []).length * 5, 15);
+  if ((p.tags || []).length) score += 5;
+  if (p.lastInteraction) {
+    const days = Math.floor((Date.now() - new Date(p.lastInteraction)) / 86400000);
+    if (days < 7) score += 5;
+  }
+  return Math.min(score, 100);
+}
+function scoreBar(p) {
+  const s = calcScore(p);
+  const cls = s < 35 ? 'sf-low' : s < 65 ? 'sf-mid' : 'sf-high';
+  return `<div class="score-bar" title="Score d'engagement: ${s}/100"><div class="score-track"><div class="score-fill ${cls}" style="width:${s}%"></div></div><span class="score-num">${s}</span></div>`;
+}
+
+// =============================================
+// OBJECTIVES
+// =============================================
+function getObjectives() {
+  const o = localStorage.getItem(userKey('objectives'));
+  return o ? JSON.parse(o) : { newProspects: 20, signed: 5, revenue: 50000 };
+}
+function saveObjectives(obj) {
+  localStorage.setItem(userKey('objectives'), JSON.stringify(obj));
+  if (useFirebase && currentUser) {
+    db.collection('users').doc(currentUser.uid).set({ objectives: JSON.stringify(obj) }, { merge: true }).catch(() => {});
+  }
+}
+function getMonthProgress() {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  const newP = prospects.filter(p => (p.createdAt || '') >= monthStart).length;
+  const signed = prospects.filter(p => {
+    if (p.stage !== 5) return false;
+    const a = (p.activity || []).filter(x => x.type === 'stage' && x.detail.includes('Signe'));
+    if (a.length) return a[a.length - 1].date >= monthStart;
+    return (p.lastInteraction || '') >= monthStart;
+  }).length;
+  const revenue = prospects.filter(p => p.stage === 5).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+  return { newP, signed, revenue };
+}
+
+// =============================================
+// TEMPLATES (Email/SMS)
+// =============================================
+function getTemplates() {
+  const t = localStorage.getItem(userKey('templates'));
+  return t ? JSON.parse(t) : [
+    { name: 'Email accroche', type: 'email', content: 'Bonjour {prenom},\n\nJe me permets de vous contacter concernant {entreprise}.\n\nCordialement' },
+    { name: 'SMS rappel', type: 'sms', content: 'Bonjour {prenom}, suite a notre echange, je voulais reprendre contact. Disponible cette semaine ?' }
+  ];
+}
+function saveTemplates(t) {
+  localStorage.setItem(userKey('templates'), JSON.stringify(t));
+  if (useFirebase && currentUser) {
+    db.collection('users').doc(currentUser.uid).set({ templates: JSON.stringify(t) }, { merge: true }).catch(() => {});
+  }
+}
+function fillTemplate(content, p) {
+  return content
+    .replace(/{prenom}/g, p.firstName || '')
+    .replace(/{nom}/g, p.lastName || '')
+    .replace(/{entreprise}/g, p.address || '')
+    .replace(/{ville}/g, p.city || '')
+    .replace(/{email}/g, p.email || '')
+    .replace(/{telephone}/g, p.phone || '');
+}
+function copyTemplate(prospectId, tplIdx) {
+  const p = prospects.find(x => x.id === prospectId);
+  const tpl = getTemplates()[tplIdx];
+  if (!p || !tpl) return;
+  const text = fillTemplate(tpl.content, p);
+  navigator.clipboard.writeText(text).then(() => {
+    toast('Template copie', 'ok');
+    logActivity(p, 'note', `Template "${tpl.name}" copie`);
+    save();
+  });
+}
+
+// =============================================
+// BROWSER NOTIFICATIONS
+// =============================================
+function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+function checkLateNotifs() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const late = prospects.filter(p => {
+    if (p.stage >= 5) return false;
+    const s = getSeq(p);
+    return s.step >= 0 && s.days !== null && s.days < 0;
+  });
+  if (late.length > 0) {
+    const last = parseInt(localStorage.getItem(userKey('lastNotif')) || '0');
+    const now = Date.now();
+    if (now - last > 30 * 60 * 1000) {
+      new Notification(`${late.length} tache${late.length > 1 ? 's' : ''} en retard`, {
+        body: `Vous avez ${late.length} prospect${late.length > 1 ? 's' : ''} a relancer.`,
+        icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64"%3E%3Crect width="64" height="64" fill="%23c9a96e" rx="14"/%3E%3Ctext x="50%25" y="60%25" text-anchor="middle" fill="%23000" font-family="serif" font-size="36" font-weight="700"%3EC%3C/text%3E%3C/svg%3E'
+      });
+      localStorage.setItem(userKey('lastNotif'), String(now));
+    }
+  }
+}
+
+// =============================================
+// CALENDAR
+// =============================================
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let calSelected = null;
+
+function renderCalendar() {
+  const el = document.getElementById('calendarBody');
+  const monthNames = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'];
+  const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0);
+  const startWeekday = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = lastDay.getDate();
+  const todayStr = today();
+
+  // Build events map
+  const events = {};
+  prospects.forEach(p => {
+    if (p.rappelDate) {
+      events[p.rappelDate] = events[p.rappelDate] || [];
+      events[p.rappelDate].push({ type: 'rappel', prospect: p, label: 'Rappel' });
+    }
+    if (p.contactDate && p.stage < 5 && p.stage !== 6) {
+      const s = getSeq(p);
+      if (s.step >= 0 && s.dueDate) {
+        events[s.dueDate] = events[s.dueDate] || [];
+        events[s.dueDate].push({ type: s.days < 0 ? 'late' : 'seq', prospect: p, label: SEQ[s.step]?.label || 'Tache', step: s.step });
+      }
+    }
+  });
+
+  let html = `
+    <div class="cal-header">
+      <div class="cal-title">${monthNames[calMonth]} ${calYear}</div>
+      <div class="cal-nav">
+        <button onclick="calPrev()">&#10094;</button>
+        <button onclick="calToday()" style="width:auto;padding:0 12px;font-size:11px">Auj.</button>
+        <button onclick="calNext()">&#10095;</button>
+      </div>
+    </div>
+    <div class="cal-grid">
+      ${dayNames.map(d => `<div class="cal-day-name">${d}</div>`).join('')}`;
+
+  // Previous month padding
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+  for (let i = startWeekday - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${prevLast - i}</div></div>`;
+  }
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayEvents = events[dateStr] || [];
+    const isToday = dateStr === todayStr;
+    const isSelected = dateStr === calSelected;
+    const evHtml = dayEvents.slice(0, 3).map(e => `<div class="cal-event ${e.type}">${(e.prospect.firstName || '') + ' ' + (e.prospect.lastName || '')}</div>`).join('') + (dayEvents.length > 3 ? `<div class="cal-event">+${dayEvents.length - 3}</div>` : '');
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="calSelectDay('${dateStr}')"><div class="cal-day-num">${d}</div><div class="cal-day-events">${evHtml}</div></div>`;
+  }
+  // Next month padding
+  const totalCells = startWeekday + daysInMonth;
+  const remainder = (7 - (totalCells % 7)) % 7;
+  for (let i = 1; i <= remainder; i++) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
+  html += `</div>`;
+
+  // Day detail
+  if (calSelected && events[calSelected]) {
+    html += `<div class="cal-day-detail"><h3>${fmtDate(calSelected)} &middot; ${events[calSelected].length} evenement${events[calSelected].length > 1 ? 's' : ''}</h3><div class="cal-detail-list">${events[calSelected].map(e => {
+      const p = e.prospect; const col = avatarColor(p.lastName);
+      const icon = e.type === 'rappel' ? '\u23F0' : e.type === 'late' ? '\u26A0' : '\u2713';
+      return `<div class="cal-detail-item" onclick="openProspect(${p.id})"><div class="task-avatar" style="background:${col};width:30px;height:30px;font-size:11px">${initials(p)}</div><div style="flex:1"><div style="font-size:12px;font-weight:600">${p.firstName || ''} ${p.lastName || ''}</div><div style="font-size:10px;color:var(--sub)">${icon} ${e.label}</div></div></div>`;
+    }).join('')}</div></div>`;
+  } else if (calSelected) {
+    html += `<div class="cal-day-detail"><h3>${fmtDate(calSelected)}</h3><p style="color:var(--sub);font-size:12px">Aucun evenement ce jour.</p></div>`;
+  }
+
+  el.innerHTML = html;
+}
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+function calToday() { calMonth = new Date().getMonth(); calYear = new Date().getFullYear(); calSelected = today(); renderCalendar(); }
+function calSelectDay(d) { calSelected = d; renderCalendar(); }
+
+// =============================================
+// DASHBOARD
+// =============================================
+function renderDashboard() {
+  const el = document.getElementById('dashBody');
+  const tot = prospects.length;
+  const sig = prospects.filter(p => p.stage === 5).length;
+  const late = prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }).length;
+  const totalAmount = prospects.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+  const hot = prospects.filter(p => p.priority === 'hot' && p.stage < 5 && p.stage !== 6).length;
+
+  // Recent activity across all prospects
+  const allActivity = [];
+  prospects.forEach(p => {
+    (p.activity || []).forEach(a => {
+      allActivity.push({ ...a, prospect: p });
+    });
+  });
+  allActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const recent = allActivity.slice(0, 8);
+
+  // Funnel
+  const funnel = STAGES.filter(s => s.id !== 6).map(s => ({
+    label: s.label, n: prospects.filter(p => p.stage === s.id).length, color: s.color
+  }));
+  const maxFunnel = Math.max(...funnel.map(f => f.n), 1);
+
+  // Upcoming tasks
+  const tasks = [];
+  prospects.forEach(p => {
+    if (p.stage >= 5) return;
+    const s = getSeq(p);
+    if (s.step >= 0 && s.days !== null && s.days <= 3) {
+      tasks.push({ prospect: p, seq: SEQ[s.step], days: s.days });
+    }
+  });
+  tasks.sort((a, b) => a.days - b.days);
+
+  const greeting = new Date().getHours() < 12 ? 'Bonjour' : new Date().getHours() < 18 ? 'Bon apres-midi' : 'Bonsoir';
+
+  el.innerHTML = `
+    <div class="dash-grid">
+      <div class="dash-welcome">
+        <h2>${greeting}, ${currentUser?.name || 'Utilisateur'}</h2>
+        <div class="sub">${tot} prospects &middot; ${sig} signes &middot; ${late} en retard &middot; ${hot} chauds &middot; ${totalAmount ? totalAmount.toLocaleString('fr-FR') + ' EUR pipeline' : 'Aucun montant'}</div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary" onclick="openProspect(null)">+ Nouveau prospect</button>
+          ${tasks.length ? `<button class="btn btn-ghost" onclick="nav('tasks');setTimeout(startFocus,200)">Mode Focus (${tasks.length})</button>` : ''}
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h3>Entonnoir de conversion</h3>
+        ${funnel.map(f => `<div class="dash-funnel-row"><div class="dash-funnel-lbl">${f.label}</div><div class="dash-funnel-bar" style="width:${Math.max(f.n / maxFunnel * 100, 12)}%;background:${f.color}">${f.n}</div></div>`).join('')}
+      </div>
+
+      <div class="dash-card">
+        <h3>Taches a venir</h3>
+        ${tasks.length ? tasks.slice(0, 5).map(t => {
+          const p = t.prospect; const col = avatarColor(p.lastName);
+          let badge = '';
+          if (t.days < 0) badge = `<span class="task-day-badge tdb-late" style="font-size:9px">${Math.abs(t.days)}j</span>`;
+          else if (t.days === 0) badge = `<span class="task-day-badge tdb-today" style="font-size:9px">Auj.</span>`;
+          else badge = `<span class="task-day-badge tdb-soon" style="font-size:9px">J+${t.days}</span>`;
+          return `<div class="dash-recent-item" style="cursor:pointer" onclick="openProspect(${p.id})"><div class="dash-recent-icon" style="background:${col};color:#fff;font-size:10px;font-weight:700">${initials(p)}</div><div class="dash-recent-info"><div class="lbl">${p.firstName || ''} ${p.lastName || ''}</div><div class="desc">${t.seq.label}</div></div>${badge}</div>`;
+        }).join('') : '<div style="color:var(--sub);font-size:12px;text-align:center;padding:20px">Aucune tache</div>'}
+      </div>
+
+      <div class="dash-card">
+        <h3>Activite recente</h3>
+        <div class="dash-recent">
+          ${recent.length ? recent.map(a => {
+            const icons = { stage: '\u2192', note: '\u270E', seq: '\u2713', create: '+', import: '\u2193' };
+            return `<div class="dash-recent-item" style="cursor:pointer" onclick="openProspect(${a.prospect.id})"><div class="dash-recent-icon">${icons[a.type] || '\u2022'}</div><div class="dash-recent-info"><div class="lbl">${(a.prospect.firstName || '') + ' ' + (a.prospect.lastName || '')}</div><div class="desc">${a.detail} &middot; ${fmtDateTime(a.date)}</div></div></div>`;
+          }).join('') : '<div style="color:var(--sub);font-size:12px;text-align:center;padding:20px">Aucune activite</div>'}
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h3>Objectifs du mois</h3>
+        ${(() => {
+          const obj = getObjectives();
+          const prog = getMonthProgress();
+          const items = [
+            { lbl: 'Nouveaux prospects', cur: prog.newP, tgt: obj.newProspects },
+            { lbl: 'Signes', cur: prog.signed, tgt: obj.signed },
+            { lbl: 'CA realise (EUR)', cur: prog.revenue, tgt: obj.revenue, fmt: v => v.toLocaleString('fr-FR') }
+          ];
+          return items.map(it => {
+            const pct = it.tgt > 0 ? Math.min((it.cur / it.tgt) * 100, 100) : 0;
+            const fmt = it.fmt || (v => v);
+            return `<div class="obj-row"><span class="obj-lbl">${it.lbl}</span><span class="obj-val">${fmt(it.cur)} / ${fmt(it.tgt)}</span></div><div class="obj-bar"><div class="obj-fill ${pct >= 100 ? 'complete' : ''}" style="width:${pct}%"></div></div>`;
+          }).join('');
+        })()}
+        <div style="font-size:10px;color:var(--hint);margin-top:6px">Configurable dans Parametres</div>
+      </div>
+
+      <div class="dash-card">
+        <h3>Prospects chauds</h3>
+        ${prospects.filter(p => p.priority === 'hot' && p.stage < 5 && p.stage !== 6).length ?
+          prospects.filter(p => p.priority === 'hot' && p.stage < 5 && p.stage !== 6).slice(0, 5).map(p => {
+            const col = avatarColor(p.lastName); const st = STAGES[p.stage] || STAGES[0];
+            return `<div class="dash-recent-item" style="cursor:pointer" onclick="openProspect(${p.id})"><div class="priority-dot priority-hot" style="margin-right:4px"></div><div class="dash-recent-icon" style="background:${col};color:#fff;font-size:10px;font-weight:700">${initials(p)}</div><div class="dash-recent-info"><div class="lbl">${p.firstName || ''} ${p.lastName || ''}</div><div class="desc">${st.label}${p.amount ? ' &middot; ' + parseFloat(p.amount).toLocaleString('fr-FR') + ' EUR' : ''}</div></div></div>`;
+          }).join('') : '<div style="color:var(--sub);font-size:12px;text-align:center;padding:20px">Aucun prospect chaud</div>'
+        }
+      </div>
+    </div>`;
+}
+
+// =============================================
+// KPI
+// =============================================
+function renderKPI() {
+  const tot = prospects.length, sig = prospects.filter(p => p.stage === 5).length;
+  const rdv = prospects.filter(p => p.stage >= 3 && p.stage !== 6).length;
+  const late = prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }).length;
+  const conv = tot ? Math.round(sig / tot * 100) : 0;
+  const totalAmount = prospects.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+  const amtStr = totalAmount ? totalAmount.toLocaleString('fr-FR') + 'E' : '0';
+  document.getElementById('kpiStrip').innerHTML = [
+    { lbl: 'Prospects', val: tot, delta: 'Total', cls: 'kd-gold' },
+    { lbl: 'En cours', val: prospects.filter(p => p.stage < 5 && p.stage !== 6).length, delta: 'Actifs', cls: 'kd-gold' },
+    { lbl: 'RDV & +', val: rdv, delta: 'Etape 3+', cls: 'kd-orange' },
+    { lbl: 'Signes', val: sig, delta: conv + '%', cls: 'kd-green' },
+    { lbl: 'En retard', val: late, delta: 'A relancer', cls: late > 0 ? 'kd-red' : 'kd-gold' },
+    { lbl: 'Montant', val: amtStr, delta: 'Pipeline', cls: 'kd-gold' },
+  ].map(k => `<div class="kpi-item"><div class="kpi-lbl">${k.lbl}</div><div class="kpi-row"><div class="kpi-val">${k.val}</div><div class="kpi-delta ${k.cls}">${k.delta}</div></div></div>`).join('');
+}
+
+// =============================================
+// KANBAN + DRAG & DROP
+// =============================================
+let dragId = null;
+
+function renderKanban() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const kbSel = document.getElementById('kbCat'); const curVal = kbSel.value;
+  kbSel.innerHTML = `<option value="">Tous les profils</option>` + CATS.map(c => `<option ${c === curVal ? 'selected' : ''}>${c}</option>`).join('');
+  const cat = kbSel.value;
+  const prioF = document.getElementById('kbPriority').value;
+  let visible = 0;
+  document.getElementById('kanbanBody').innerHTML = STAGES.map(st => {
+    const cards = prospects.filter(p => p.stage === st.id && match(p, q) && (!cat || p.category === cat) && (!prioF || p.priority === prioF));
+    visible += cards.length;
+    return `<div class="col" data-stage="${st.id}" ondragover="dOver(event)" ondragleave="dLeave(event)" ondrop="dDrop(event,${st.id})"><div class="col-head"><div class="col-dot-label"><div class="col-dot" style="background:${st.color}"></div>${st.label}</div><div class="col-n">${cards.length}</div></div><div class="col-body">${cards.map(p => kCard(p)).join('')}<div style="height:4px"></div></div></div>`;
   }).join('');
-  document.getElementById('kbCount').textContent=`${visible} prospect${visible>1?'s':''}`;
+  document.getElementById('kbCount').textContent = `${visible} prospect${visible > 1 ? 's' : ''}`;
 }
 
-function kCard(p){
-  const s=getSeq(p);const col=avatarColor(p.lastName);
-  let chip='';
-  if(p.stage===5) chip=`<span class="seq-chip sc-ok">\u2713 Signe</span>`;
-  else if(p.stage===6) chip=`<span class="seq-chip sc-idle">Perdu</span>`;
-  else if(!p.contactDate) chip=`<span class="seq-chip sc-idle">Non demarre</span>`;
-  else if(s.step===-1) chip=`<span class="seq-chip sc-ok">\u2713 Fini</span>`;
-  else if(s.days<0) chip=`<span class="seq-chip sc-late">Retard ${Math.abs(s.days)}j</span>`;
-  else if(s.days<=2) chip=`<span class="seq-chip sc-due">${s.days===0?"Aujourd'hui":"Dans "+s.days+"j"}</span>`;
-  else chip=`<span class="seq-chip sc-pending">${SEQ[s.step].icon} J+${s.days}</span>`;
-  return`<div class="kcard" onclick="openProspect(${p.id})">
-    <div class="kcard-top"><div class="kcard-avatar" style="background:${col}">${initials(p)}</div><div style="min-width:0"><div class="kcard-name">${p.firstName||''} ${p.lastName||''}</div><div class="kcard-cat">${p.category||'\u2014'}</div></div></div>
-    ${p.city?`<div class="kcard-city">${p.city}</div>`:''}
-    <div class="kcard-footer">${chip}<div class="kcard-date">${fmtDate(p.contactDate)}</div></div>
+function kCard(p) {
+  const s = getSeq(p); const col = avatarColor(p.lastName);
+  let chip = '';
+  if (p.stage === 5) chip = `<span class="seq-chip sc-ok">\u2713 Signe</span>`;
+  else if (p.stage === 6) chip = `<span class="seq-chip sc-idle">Perdu</span>`;
+  else if (!p.contactDate) chip = `<span class="seq-chip sc-idle">Non demarre</span>`;
+  else if (s.step === -1) chip = `<span class="seq-chip sc-ok">\u2713 Fini</span>`;
+  else if (s.days < 0) chip = `<span class="seq-chip sc-late">Retard ${Math.abs(s.days)}j</span>`;
+  else if (s.days <= 2) chip = `<span class="seq-chip sc-due">${s.days === 0 ? "Aujourd'hui" : "Dans " + s.days + "j"}</span>`;
+  else chip = `<span class="seq-chip sc-pending">${SEQ[s.step]?.icon || '?'} J+${s.days}</span>`;
+  const amt = p.amount ? `<div style="font-size:10px;color:var(--gold);font-weight:600;margin-bottom:4px">${parseFloat(p.amount).toLocaleString('fr-FR')} EUR</div>` : '';
+  const prioDot = p.priority ? `<div class="priority-dot priority-${p.priority}" style="position:absolute;top:8px;right:8px" title="${p.priority}"></div>` : '';
+  const tagsHtml = (p.tags || []).length ? `<div class="kcard-tags">${p.tags.slice(0, 3).map(t => `<span class="kcard-tag">${t}</span>`).join('')}</div>` : '';
+  return `<div class="kcard" draggable="true" ondragstart="dStart(event,${p.id})" ondragend="dEnd(event)" onclick="openProspect(${p.id})">
+    ${prioDot}
+    <div class="kcard-top"><div class="kcard-avatar" style="background:${col}">${initials(p)}</div><div style="min-width:0"><div class="kcard-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="kcard-cat">${p.category || '\u2014'}</div></div></div>
+    ${p.city ? `<div class="kcard-city">${p.city}</div>` : ''}${tagsHtml}${amt}
+    <div class="kcard-footer">${chip}${scoreBar(p)}</div>
+    <div style="font-size:9px;color:var(--hint);margin-top:4px;text-align:right">${fmtDate(p.contactDate)}</div>
   </div>`;
 }
 
-function renderList(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  const stSel=document.getElementById('lstStage');const stCur=stSel.value;
-  stSel.innerHTML=`<option value="">Toutes etapes</option>`+STAGES.map(s=>`<option value="${s.id}" ${stCur==s.id?'selected':''}>${s.label}</option>`).join('');
-  const catSel=document.getElementById('lstCat');const catCur=catSel.value;
-  catSel.innerHTML=`<option value="">Tous profils</option>`+CATS.map(c=>`<option ${c===catCur?'selected':''}>${c}</option>`).join('');
-  const stF=stSel.value,catF=catSel.value;
-  let data=prospects.filter(p=>match(p,q)&&(stF===''||p.stage==stF)&&(catF===''||p.category===catF));
-  data.sort((a,b)=>{let va=a[sortField]||'',vb=b[sortField]||'';if(typeof va==='number')return sortAsc?va-vb:vb-va;return sortAsc?String(va).localeCompare(String(vb),'fr'):String(vb).localeCompare(String(va),'fr');});
-  document.getElementById('lstCount').textContent=`${data.length} resultat${data.length>1?'s':''}`;
-  const cols=[['lastName','Nom'],['category','Profil'],['city','Ville'],['stage','Etape'],['email','Email'],['phone','Tel'],['contactDate','1er contact']];
-  document.getElementById('listHead').innerHTML=cols.map(([f,l])=>`<th onclick="sortBy('${f}')">${l}${sortField===f?sortAsc?' \u2191':' \u2193':''}</th>`).join('')+'<th>Seq.</th><th></th>';
-  document.getElementById('listBody').innerHTML=data.map(p=>{
-    const st=STAGES[p.stage]||STAGES[0];const s=getSeq(p);const col=avatarColor(p.lastName);
-    let seq='\u2014';
-    if(p.contactDate){if(s.step===-1)seq=`<span style="color:var(--green);font-size:11px;font-weight:600">\u2713 Finie</span>`;
-    else if(s.days<0)seq=`<span style="color:var(--red);font-size:11px;font-weight:600">${Math.abs(s.days)}j retard</span>`;
-    else seq=`<span style="color:var(--sub);font-size:11px">${SEQ[s.step]?.icon||''} ${s.days===0?"Auj.":"J+"+s.days}</span>`;}
-    return`<tr>
-      <td><div class="name-cell"><div class="avatar-sm" style="background:${col}">${initials(p)}</div><span style="font-weight:600">${p.firstName||''} ${p.lastName||''}</span></div></td>
-      <td>${p.category?`<span class="cat-pill">${p.category}</span>`:'<span style="color:var(--hint)">\u2014</span>'}</td>
-      <td style="color:var(--sub)">${p.city||'\u2014'}</td>
+function dStart(e, id) { dragId = id; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+function dEnd(e) { e.target.classList.remove('dragging'); dragId = null; }
+function dOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dDrop(e, stageId) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  if (dragId === null) return;
+  const p = prospects.find(x => x.id === dragId);
+  if (p && p.stage !== stageId) {
+    const oldStage = STAGES[p.stage]?.label || '?';
+    p.stage = stageId;
+    logActivity(p, 'stage', `${oldStage} \u2192 ${STAGES[stageId]?.label || '?'}`);
+    if (!p.contactDate && stageId >= 1) p.contactDate = today();
+    save(); renderAll(); toast('Etape mise a jour', 'ok');
+  }
+  dragId = null;
+}
+
+// =============================================
+// LIST + BULK ACTIONS
+// =============================================
+function renderList() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const stSel = document.getElementById('lstStage'); const stCur = stSel.value;
+  stSel.innerHTML = `<option value="">Toutes etapes</option>` + STAGES.map(s => `<option value="${s.id}" ${stCur == s.id ? 'selected' : ''}>${s.label}</option>`).join('');
+  const catSel = document.getElementById('lstCat'); const catCur = catSel.value;
+  catSel.innerHTML = `<option value="">Tous profils</option>` + CATS.map(c => `<option ${c === catCur ? 'selected' : ''}>${c}</option>`).join('');
+  const stF = stSel.value, catF = catSel.value;
+  const prioF = document.getElementById('lstPriority').value;
+  let data = prospects.filter(p => match(p, q) && (stF === '' || p.stage == stF) && (catF === '' || p.category === catF) && (!prioF || p.priority === prioF));
+  data.sort((a, b) => { let va = a[sortField] || '', vb = b[sortField] || ''; if (typeof va === 'number') return sortAsc ? va - vb : vb - va; return sortAsc ? String(va).localeCompare(String(vb), 'fr') : String(vb).localeCompare(String(va), 'fr'); });
+  document.getElementById('lstCount').textContent = `${data.length} resultat${data.length > 1 ? 's' : ''}`;
+  const cols = [['lastName', 'Nom'], ['category', 'Profil'], ['priority', 'Prio.'], ['city', 'Ville'], ['stage', 'Etape'], ['amount', 'Montant'], ['email', 'Email'], ['phone', 'Tel'], ['contactDate', 'Contact']];
+  document.getElementById('listHead').innerHTML = `<th style="width:30px"><input type="checkbox" class="row-check" onchange="toggleAll(this.checked)"></th>` + cols.map(([f, l]) => `<th onclick="sortBy('${f}')">${l}${sortField === f ? sortAsc ? ' \u2191' : ' \u2193' : ''}</th>`).join('') + '<th>Score</th><th>Seq.</th><th></th>';
+  document.getElementById('listBody').innerHTML = data.map(p => {
+    const st = STAGES[p.stage] || STAGES[0]; const s = getSeq(p); const col = avatarColor(p.lastName);
+    const sel = selectedIds.has(p.id);
+    let seq = '\u2014';
+    if (p.contactDate) {
+      if (s.step === -1) seq = `<span style="color:var(--green);font-size:11px;font-weight:600">\u2713</span>`;
+      else if (s.days < 0) seq = `<span style="color:var(--red);font-size:11px;font-weight:600">${Math.abs(s.days)}j</span>`;
+      else seq = `<span style="color:var(--sub);font-size:11px">${SEQ[s.step]?.icon || ''} J+${s.days}</span>`;
+    }
+    const prioDot = p.priority ? `<span class="priority-dot priority-${p.priority}" style="display:inline-block;vertical-align:middle"></span>` : '<span style="color:var(--hint)">\u2014</span>';
+    return `<tr class="${sel ? 'selected' : ''}">
+      <td><input type="checkbox" class="row-check" ${sel ? 'checked' : ''} onchange="toggleSelect(${p.id},this.checked)"></td>
+      <td><div class="name-cell"><div class="avatar-sm" style="background:${col}">${initials(p)}</div><span style="font-weight:600">${p.firstName || ''} ${p.lastName || ''}</span></div></td>
+      <td>${p.category ? `<span class="cat-pill">${p.category}</span>` : '<span style="color:var(--hint)">\u2014</span>'}</td>
+      <td style="text-align:center">${prioDot}</td>
+      <td style="color:var(--sub)">${p.city || '\u2014'}</td>
       <td><span class="stage-pill" style="background:${st.color}12;color:${st.color};border:1px solid ${st.color}25"><span style="width:6px;height:6px;border-radius:50%;background:${st.color};display:inline-block"></span>${st.label}</span></td>
-      <td style="color:var(--sub)">${p.email||'\u2014'}</td>
-      <td style="color:var(--sub)">${p.phone||'\u2014'}</td>
+      <td style="color:var(--gold);font-weight:600;font-size:11px">${p.amount ? parseFloat(p.amount).toLocaleString('fr-FR') + ' EUR' : '\u2014'}</td>
+      <td style="color:var(--sub)">${p.email || '\u2014'}</td>
+      <td style="color:var(--sub)">${p.phone || '\u2014'}</td>
       <td style="color:var(--sub)">${fmtDate(p.contactDate)}</td>
+      <td>${scoreBar(p)}</td>
       <td>${seq}</td>
       <td><button class="act-btn" onclick="openProspect(${p.id})">&#9998;</button><button class="act-btn" onclick="del(${p.id})">&#10005;</button></td>
     </tr>`;
   }).join('');
+  updateBulkBar();
 }
-function sortBy(f){if(sortField===f)sortAsc=!sortAsc;else{sortField=f;sortAsc=true;}renderList();}
 
-function openProspect(id){
-  const isNew=id===null;
-  let p=isNew?{id:null,stage:0,seqDone:[],notes:[],contactDate:null,createdAt:today()}:prospects.find(x=>x.id===id);
-  if(!p)return;
-  const col=avatarColor(p.lastName);
-  document.getElementById('mAvatar').style.background=col;
-  document.getElementById('mAvatar').textContent=isNew?'+':initials(p);
-  document.getElementById('mTitle').textContent=isNew?'Nouveau prospect':`${p.firstName||''} ${p.lastName||''}`.trim()||'Prospect';
-  document.getElementById('mSub').textContent=isNew?'Ajouter un contact':[p.category,p.city].filter(Boolean).join(' \u00b7 ')||'';
-  document.getElementById('mBody').innerHTML=`
+function sortBy(f) { if (sortField === f) sortAsc = !sortAsc; else { sortField = f; sortAsc = true; } renderList(); }
+function toggleSelect(id, checked) { if (checked) selectedIds.add(id); else selectedIds.delete(id); renderList(); }
+function toggleAll(checked) { const q = document.getElementById('searchInput').value.toLowerCase(); const stF = document.getElementById('lstStage').value; const catF = document.getElementById('lstCat').value; const prioF = document.getElementById('lstPriority').value; prospects.filter(p => match(p, q) && (stF === '' || p.stage == stF) && (catF === '' || p.category === catF) && (!prioF || p.priority === prioF)).forEach(p => { if (checked) selectedIds.add(p.id); else selectedIds.delete(p.id); }); renderList(); }
+function clearSelection() { selectedIds.clear(); renderList(); }
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  if (selectedIds.size > 0) {
+    bar.classList.remove('hidden');
+    document.getElementById('bulkCount').textContent = selectedIds.size + ' selectionne' + (selectedIds.size > 1 ? 's' : '');
+    document.getElementById('bulkStage').innerHTML = `<option value="">Changer etape...</option>` + STAGES.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+  } else { bar.classList.add('hidden'); }
+}
+function bulkChangeStage() {
+  const stageId = parseInt(document.getElementById('bulkStage').value);
+  if (isNaN(stageId)) return toast('Selectionnez une etape', 'err');
+  selectedIds.forEach(id => { const p = prospects.find(x => x.id === id); if (p) { logActivity(p, 'stage', `Bulk \u2192 ${STAGES[stageId]?.label || '?'}`); p.stage = stageId; } });
+  save(); selectedIds.clear(); renderAll(); toast('Etapes mises a jour', 'ok');
+}
+function bulkDelete() {
+  if (!confirm(`Supprimer ${selectedIds.size} prospect(s) ?`)) return;
+  prospects = prospects.filter(p => !selectedIds.has(p.id));
+  save(); selectedIds.clear(); renderAll(); toast('Prospects supprimes', 'ok');
+}
+
+// =============================================
+// PROSPECT MODAL (with tags + priority)
+// =============================================
+function openProspect(id) {
+  const isNew = id === null;
+  let p = isNew ? { id: null, stage: 0, seqDone: [], notes: [], activity: [], contactDate: null, createdAt: today(), amount: '', source: '', linkedin: '', rappelDate: '', priority: '', tags: [] } : prospects.find(x => x.id === id);
+  if (!p) return;
+  if (!p.tags) p.tags = [];
+  if (!p.priority) p.priority = '';
+  const col = avatarColor(p.lastName);
+  document.getElementById('mAvatar').style.background = col;
+  document.getElementById('mAvatar').textContent = isNew ? '+' : initials(p);
+  document.getElementById('mTitle').textContent = isNew ? 'Nouveau prospect' : `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Prospect';
+  document.getElementById('mSub').textContent = isNew ? 'Ajouter un contact' : [p.category, p.city].filter(Boolean).join(' \u00b7 ') || '';
+
+  const actHtml = (p.activity || []).length ? `<div class="section-label" style="margin-top:16px">Historique d'activite</div><div class="timeline">${(p.activity || []).slice().reverse().slice(0, 15).map(a => {
+    const labels = { stage: 'Etape', note: 'Note', seq: 'Sequence', create: 'Creation', import: 'Import' };
+    return `<div class="tl-item"><div class="tl-dot ${a.type}"></div><div class="tl-content"><div class="tl-label">${labels[a.type] || 'Action'} &middot; ${a.detail}</div><div class="tl-date">${fmtDateTime(a.date)}</div></div></div>`;
+  }).join('')}</div>` : '';
+
+  const tpls = !isNew && p.id ? getTemplates() : [];
+  const tplHtml = tpls.length ? `<div class="section-label" style="margin-top:16px">Templates rapides</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tpls.map((t, i) => `<button class="btn btn-ghost btn-sm" onclick="copyTemplate(${p.id},${i})" title="Copier dans le presse-papiers"><span style="color:var(--gold);font-weight:700;margin-right:4px">${t.type === 'sms' ? 'SMS' : t.type === 'linkedin' ? 'LI' : 'Mail'}</span>${t.name}</button>`).join('')}</div><div style="font-size:10px;color:var(--hint);margin-top:6px">Cliquez pour copier le message rempli (variables remplacees).</div>` : '';
+
+  const tagsHtml = (p.tags || []).map(t => `<span class="tag-chip">${t}<button onclick="removeTag(this,'${t.replace(/'/g, "\\'")}')">\u00d7</button></span>`).join('');
+
+  document.getElementById('mBody').innerHTML = `
+    <div id="dupWarn"></div>
     <div class="section-label">Informations</div>
     <div class="form-grid">
-      <div class="field"><label>Prenom</label><input id="f_firstName" value="${p.firstName||''}"></div>
-      <div class="field"><label>Nom</label><input id="f_lastName" value="${p.lastName||''}"></div>
-      <div class="field"><label>Profil</label><select id="f_category"><option value="">\u2014</option>${CATS.map(c=>`<option ${p.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
-      <div class="field"><label>Etape</label><select id="f_stage">${STAGES.map(s=>`<option value="${s.id}" ${p.stage===s.id?'selected':''}>${s.label}</option>`).join('')}</select></div>
-      <div class="field"><label>Email</label><input type="email" id="f_email" value="${p.email||''}"></div>
-      <div class="field"><label>Telephone</label><input type="tel" id="f_phone" value="${p.phone||''}"></div>
-      <div class="field"><label>Ville</label><input id="f_city" value="${p.city||''}"></div>
-      <div class="field"><label>Date 1er contact</label><input type="date" id="f_contactDate" value="${p.contactDate||''}"></div>
-      <div class="field form-full"><label>Entreprise / Cabinet</label><input id="f_address" value="${p.address||''}"></div>
+      <div class="field"><label>Prenom</label><input id="f_firstName" value="${p.firstName || ''}"></div>
+      <div class="field"><label>Nom</label><input id="f_lastName" value="${p.lastName || ''}"></div>
+      <div class="field"><label>Profil</label><select id="f_category"><option value="">\u2014</option>${CATS.map(c => `<option ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Etape</label><select id="f_stage">${STAGES.map(s => `<option value="${s.id}" ${p.stage === s.id ? 'selected' : ''}>${s.label}</option>`).join('')}</select></div>
+      <div class="field"><label>Priorite</label><select id="f_priority"><option value="">Non definie</option><option value="hot" ${p.priority === 'hot' ? 'selected' : ''}>Chaud</option><option value="warm" ${p.priority === 'warm' ? 'selected' : ''}>Tiede</option><option value="cold" ${p.priority === 'cold' ? 'selected' : ''}>Froid</option></select></div>
+      <div class="field"><label>Email</label><input type="email" id="f_email" value="${p.email || ''}" oninput="checkDup(${p.id || 'null'})"></div>
+      <div class="field"><label>Telephone</label><input type="tel" id="f_phone" value="${p.phone || ''}" oninput="checkDup(${p.id || 'null'})"></div>
+      <div class="field"><label>Ville</label><input id="f_city" value="${p.city || ''}"></div>
+      <div class="field"><label>Date 1er contact</label><input type="date" id="f_contactDate" value="${p.contactDate || ''}"></div>
+      <div class="field"><label>Entreprise / Cabinet</label><input id="f_address" value="${p.address || ''}"></div>
+      <div class="field"><label>Montant potentiel (EUR)</label><input type="number" id="f_amount" value="${p.amount || ''}" placeholder="0"></div>
+      <div class="field"><label>LinkedIn</label><input id="f_linkedin" value="${p.linkedin || ''}" placeholder="URL profil"></div>
+      <div class="field"><label>Source d'acquisition</label><select id="f_source"><option value="">-</option>${['Recommandation', 'LinkedIn', 'Site web', 'Salon', 'Appel entrant', 'Email entrant', 'Reseau', 'Publicite', 'Autre'].map(s => `<option ${p.source === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Date de rappel</label><input type="date" id="f_rappelDate" value="${p.rappelDate || ''}"></div>
+      <div class="field form-full"><label>Tags</label>
+        <div class="tags-wrap" onclick="this.querySelector('input')?.focus()">
+          ${tagsHtml}
+          <input class="tag-input" id="f_tagInput" placeholder="Ajouter un tag..." onkeydown="handleTagKey(event)">
+        </div>
+      </div>
       <div class="field form-full"><label>Nouvelle note</label><textarea id="f_note" placeholder="Contexte, observations, prochaine action..."></textarea></div>
     </div>
     <div class="section-label" style="margin-top:4px">Sequence</div>
-    ${buildSeqHTML(p,isNew)}
-    ${(p.notes||[]).length?`<div class="section-label" style="margin-top:16px">Historique</div><div class="notes-list">${(p.notes||[]).slice().reverse().map(n=>`<div class="note-item"><div class="note-date">${fmtDate(n.date)}</div><div class="note-text">${n.text}</div></div>`).join('')}</div>`:''}
+    ${buildSeqHTML(p, isNew)}
+    ${tplHtml}
+    ${!isNew ? `<div class="section-label" style="margin-top:16px">Score d'engagement</div><div style="display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:14px"><div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);line-height:1">${calcScore(p)}</div><div style="flex:1"><div style="font-size:11px;font-weight:600;margin-bottom:4px">${calcScore(p) >= 65 ? 'Tres engage' : calcScore(p) >= 35 ? 'Engagement moyen' : 'Faible engagement'}</div><div style="height:6px;background:var(--s4);border-radius:3px;overflow:hidden"><div style="height:6px;width:${calcScore(p)}%;background:${calcScore(p) >= 65 ? 'var(--green)' : calcScore(p) >= 35 ? 'var(--orange)' : 'var(--red)'};border-radius:3px"></div></div><div style="font-size:10px;color:var(--hint);margin-top:4px">Calcule sur les coordonnees, sequence, priorite, montant, notes, tags et activite recente.</div></div></div>` : ''}
+    ${actHtml}
+    ${p.lastInteraction ? `<div style="font-size:10px;color:var(--hint);margin-top:10px">Derniere interaction: ${fmtDateTime(p.lastInteraction)}</div>` : ''}
+    ${(p.notes || []).length ? `<div class="section-label" style="margin-top:16px">Notes</div><div class="notes-list">${(p.notes || []).slice().reverse().map(n => `<div class="note-item"><div class="note-date">${fmtDate(n.date)}</div><div class="note-text">${n.text}</div></div>`).join('')}</div>` : ''}
   `;
-  document.getElementById('mFooter').innerHTML=`
-    ${!isNew?`<button class="btn btn-danger btn-sm" onclick="del(${p.id})">Supprimer</button>`:''}
+  document.getElementById('mFooter').innerHTML = `
+    ${!isNew ? `<button class="btn btn-danger btn-sm" onclick="del(${p.id})">Supprimer</button>` : ''}
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="closeModal()">Annuler</button>
-    <button class="btn btn-primary" onclick="savePros(${isNew?'null':p.id})">Enregistrer</button>`;
+    <button class="btn btn-primary" onclick="savePros(${isNew ? 'null' : p.id})">Enregistrer</button>`;
   document.getElementById('modal').classList.remove('hidden');
 }
 
-function buildSeqHTML(p,isNew){
-  const done=p.seqDone||[];
-  return`<div style="display:flex;flex-direction:column;gap:0">${SEQ.map((s,i)=>{
-    const due=p.contactDate?addDays(p.contactDate,s.day):null;
-    const isDone=done.includes(i);const isCur=!isDone&&SEQ.slice(0,i).every((_,j)=>done.includes(j));
-    const cls=isDone?'sr-done':isCur?'sr-active':'sr-pending';
-    const badge=isDone?`<span class="sr-badge sb-done">\u2713 Fait</span>`:isCur?`<span class="sr-badge sb-active">En cours</span>`:`<span class="sr-badge sb-pend">En attente</span>`;
-    const btn=(!isDone&&!isNew&&p.id)?`<button class="btn-check" onclick="markDone(${p.id},${i})">\u2713 Valider</button>`:'';
-    return`<div class="seq-row ${cls}"><div class="sr-icon">${s.icon}</div><div class="sr-info"><div class="sr-label">${s.label}</div><div class="sr-desc">J+${s.day}${due?' \u00b7 '+fmtDate(due):''} \u00b7 ${s.desc}</div></div>${badge}${btn}</div>`;
+// Tags management
+let currentTags = [];
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,/g, '');
+    if (val) {
+      const wrap = e.target.closest('.tags-wrap');
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `${val}<button onclick="removeTag(this,'${val.replace(/'/g, "\\'")}')">\u00d7</button>`;
+      wrap.insertBefore(chip, e.target);
+      e.target.value = '';
+    }
+  }
+  if (e.key === 'Backspace' && !e.target.value) {
+    const chips = e.target.closest('.tags-wrap').querySelectorAll('.tag-chip');
+    if (chips.length) chips[chips.length - 1].remove();
+  }
+}
+function removeTag(btn, tag) { btn.closest('.tag-chip').remove(); }
+function getTagsFromDOM() {
+  const chips = document.querySelectorAll('#modal .tag-chip');
+  return Array.from(chips).map(c => c.textContent.replace('\u00d7', '').trim()).filter(Boolean);
+}
+
+function checkDup(excludeId) {
+  const email = document.getElementById('f_email')?.value || '';
+  const phone = document.getElementById('f_phone')?.value || '';
+  const dups = findDuplicates(email, phone, excludeId);
+  const w = document.getElementById('dupWarn');
+  if (dups.length) { w.innerHTML = `<div class="dup-warn">Doublon potentiel : ${dups.map(d => `<strong>${d.firstName || ''} ${d.lastName || ''}</strong>`).join(', ')} - meme email ou telephone.</div>`; }
+  else { w.innerHTML = ''; }
+}
+
+function buildSeqHTML(p, isNew) {
+  const done = p.seqDone || [];
+  return `<div style="display:flex;flex-direction:column;gap:0">${SEQ.map((s, i) => {
+    const due = p.contactDate ? addDays(p.contactDate, s.day) : null;
+    const isDone = done.includes(i); const isCur = !isDone && SEQ.slice(0, i).every((_, j) => done.includes(j));
+    const cls = isDone ? 'sr-done' : isCur ? 'sr-active' : 'sr-pending';
+    const badge = isDone ? `<span class="sr-badge sb-done">\u2713 Fait</span>` : isCur ? `<span class="sr-badge sb-active">En cours</span>` : `<span class="sr-badge sb-pend">En attente</span>`;
+    const btn = (!isDone && !isNew && p.id) ? `<button class="btn-check" onclick="markDone(${p.id},${i})">\u2713 Valider</button>` : '';
+    return `<div class="seq-row ${cls}"><div class="sr-icon">${s.icon}</div><div class="sr-info"><div class="sr-label">${s.label}</div><div class="sr-desc">J+${s.day}${due ? ' \u00b7 ' + fmtDate(due) : ''} \u00b7 ${s.desc}</div></div>${badge}${btn}</div>`;
   }).join('')}</div>`;
 }
 
-function markDone(id,step){const p=prospects.find(x=>x.id===id);if(!p)return;if(!p.seqDone)p.seqDone=[];if(!p.seqDone.includes(step))p.seqDone.push(step);save();openProspect(id);renderAll();toast('Etape validee','ok');}
+function markDone(id, step) { const p = prospects.find(x => x.id === id); if (!p) return; if (!p.seqDone) p.seqDone = []; if (!p.seqDone.includes(step)) { p.seqDone.push(step); logActivity(p, 'seq', `Etape seq. validee: ${SEQ[step]?.label || '?'}`); } save(); openProspect(id); renderAll(); toast('Etape validee', 'ok'); }
 
-function savePros(id){
-  const flds=['firstName','lastName','category','email','phone','city','address','contactDate'];
-  const stage=parseInt(document.getElementById('f_stage').value);
-  const note=document.getElementById('f_note').value.trim();
-  if(id===null||id==='null'){
-    const p={id:uid(),stage,seqDone:[],notes:[],createdAt:today()};
-    flds.forEach(f=>{p[f]=document.getElementById('f_'+f).value;});
-    if(note)p.notes.push({date:today(),text:note});
+function savePros(id) {
+  const flds = ['firstName', 'lastName', 'category', 'email', 'phone', 'city', 'address', 'contactDate', 'amount', 'linkedin', 'source', 'rappelDate'];
+  const stage = parseInt(document.getElementById('f_stage').value);
+  const priority = document.getElementById('f_priority').value;
+  const tags = getTagsFromDOM();
+  const note = document.getElementById('f_note').value.trim();
+  if (id === null || id === 'null') {
+    const p = { id: uid(), stage, seqDone: [], notes: [], activity: [], createdAt: today(), priority, tags };
+    flds.forEach(f => { p[f] = document.getElementById('f_' + f)?.value || ''; });
+    if (note) p.notes.push({ date: today(), text: note });
+    logActivity(p, 'create', 'Prospect cree');
     prospects.push(p);
-  }else{
-    const p=prospects.find(x=>x.id===id);if(!p)return;
-    flds.forEach(f=>{p[f]=document.getElementById('f_'+f).value;});
-    p.stage=stage;if(note)p.notes.push({date:today(),text:note});
+  } else {
+    const p = prospects.find(x => x.id === id); if (!p) return;
+    const oldStage = p.stage;
+    flds.forEach(f => { p[f] = document.getElementById('f_' + f)?.value || ''; });
+    p.stage = stage;
+    p.priority = priority;
+    p.tags = tags;
+    if (oldStage !== stage) logActivity(p, 'stage', `${STAGES[oldStage]?.label || '?'} \u2192 ${STAGES[stage]?.label || '?'}`);
+    if (note) { p.notes.push({ date: today(), text: note }); logActivity(p, 'note', 'Note ajoutee'); }
   }
-  save();renderAll();closeModal();toast('Enregistre','ok');
+  save(); renderAll(); closeModal(); toast('Enregistre', 'ok');
 }
 
-function del(id){if(!confirm('Supprimer ce prospect ?'))return;prospects=prospects.filter(p=>p.id!==id);save();renderAll();closeModal();toast('Supprime','ok');}
-function closeModal(){document.getElementById('modal').classList.add('hidden');}
+function del(id) { if (!confirm('Supprimer ce prospect ?')) return; prospects = prospects.filter(p => p.id !== id); save(); renderAll(); closeModal(); toast('Supprime', 'ok'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
-// ── TASKS ──
-function renderTasks(){
-  const tasks=[];
-  prospects.forEach(p=>{
-    if(p.stage>=5)return;
-    const s=getSeq(p);
-    if(s.step>=0&&s.days!==null&&s.days<=3){
-      tasks.push({prospect:p,seq:SEQ[s.step],step:s.step,days:s.days,due:s.dueDate});
+// =============================================
+// TASKS (includes rappels)
+// =============================================
+function renderTasks() {
+  const tasks = [];
+  prospects.forEach(p => {
+    if (p.stage >= 5) return;
+    const s = getSeq(p);
+    if (s.step >= 0 && s.days !== null && s.days <= 3) {
+      tasks.push({ prospect: p, type: 'seq', seq: SEQ[s.step], step: s.step, days: s.days, due: s.dueDate, label: SEQ[s.step].label + ' \u2014 ' + SEQ[s.step].desc });
+    }
+    if (p.rappelDate) {
+      const rd = daysFromNow(p.rappelDate);
+      if (rd !== null && rd <= 3) {
+        tasks.push({ prospect: p, type: 'rappel', days: rd, due: p.rappelDate, label: 'Rappel programme', step: -1 });
+      }
     }
   });
-  tasks.sort((a,b)=>a.days-b.days);
-  const pending=tasks.filter(t=>!(prospects.find(p=>p.id===t.prospect.id)?.seqDone||[]).includes(t.step));
-  const done=tasks.filter(t=>(prospects.find(p=>p.id===t.prospect.id)?.seqDone||[]).includes(t.step));
-  const el=document.getElementById('tasksBody');
-  if(!tasks.length){
-    el.innerHTML=`<div class="empty-tasks"><div class="big">\u2713</div><div class="title">Aucune tache</div><p>Pas d'actions prevues dans les 3 prochains jours.</p></div>`;
+  tasks.sort((a, b) => a.days - b.days);
+  const pending = tasks.filter(t => t.type === 'rappel' || !(prospects.find(p => p.id === t.prospect.id)?.seqDone || []).includes(t.step));
+  const done = tasks.filter(t => t.type === 'seq' && (prospects.find(p => p.id === t.prospect.id)?.seqDone || []).includes(t.step));
+  const el = document.getElementById('tasksBody');
+  if (!tasks.length) {
+    el.innerHTML = `<div class="empty-tasks"><div class="big">\u2713</div><div class="title">Aucune tache</div><p>Pas d'actions prevues dans les 3 prochains jours.</p></div>`;
     return;
   }
-  el.innerHTML=`
+  el.innerHTML = `
     <div class="task-header">
       <div class="task-counter"><div class="tc-badge">${pending.length}</div><div class="tc-label">a faire</div></div>
       <div class="tc-sep"></div>
       <div class="task-counter"><div class="tc-badge" style="color:var(--green)">${done.length}</div><div class="tc-label">terminees</div></div>
       <div style="flex:1"></div>
-      ${pending.length?`<button class="focus-btn" onclick="startFocus()">Mode Focus</button>`:''}
+      ${pending.length ? `<button class="focus-btn" onclick="startFocus()">Mode Focus</button>` : ''}
     </div>
-    <div class="task-list">${tasks.map(t=>{
-      const p=t.prospect;const col=avatarColor(p.lastName);
-      const isDone=(p.seqDone||[]).includes(t.step);
-      let badge='';
-      if(t.days<0)badge=`<span class="task-day-badge tdb-late">${Math.abs(t.days)}j retard</span>`;
-      else if(t.days===0)badge=`<span class="task-day-badge tdb-today">Aujourd'hui</span>`;
-      else badge=`<span class="task-day-badge tdb-soon">J+${t.days}</span>`;
-      return`<div class="task-item${isDone?' done-task':''}">
-        <div class="task-check${isDone?' checked':''}" onclick="event.stopPropagation();markDone(${p.id},${t.step})"></div>
+    <div class="task-list">${tasks.map(t => {
+      const p = t.prospect; const col = avatarColor(p.lastName);
+      const isDone = t.type === 'seq' && (p.seqDone || []).includes(t.step);
+      let badge = '';
+      if (t.days < 0) badge = `<span class="task-day-badge tdb-late">${Math.abs(t.days)}j retard</span>`;
+      else if (t.days === 0) badge = `<span class="task-day-badge tdb-today">Aujourd'hui</span>`;
+      else badge = `<span class="task-day-badge tdb-soon">J+${t.days}</span>`;
+      const icon = t.type === 'rappel' ? '\u23F0' : '';
+      return `<div class="task-item${isDone ? ' done-task' : ''}">
+        <div class="task-check${isDone ? ' checked' : ''}" onclick="event.stopPropagation();${t.type === 'seq' ? `markDone(${p.id},${t.step})` : `clearRappel(${p.id})`}"></div>
         <div class="task-avatar" style="background:${col}">${initials(p)}</div>
-        <div class="task-info" onclick="openProspect(${p.id})"><div class="task-name">${p.firstName||''} ${p.lastName||''}</div><div class="task-desc">${t.seq.icon} ${t.seq.label} \u2014 ${t.seq.desc}</div></div>
-        <div class="task-meta">${badge}<div class="task-stage">${STAGES[p.stage]?.label||''}</div></div>
+        <div class="task-info" onclick="openProspect(${p.id})"><div class="task-name">${icon} ${p.firstName || ''} ${p.lastName || ''}</div><div class="task-desc">${t.label}</div></div>
+        <div class="task-meta">${badge}<div class="task-stage">${STAGES[p.stage]?.label || ''}</div></div>
       </div>`;
     }).join('')}</div>`;
 }
+function clearRappel(id) { const p = prospects.find(x => x.id === id); if (p) { p.rappelDate = ''; logActivity(p, 'seq', 'Rappel traite'); save(); renderAll(); toast('Rappel traite', 'ok'); } }
 
-// ── FOCUS MODE ──
-let focusTasks=[],focusIdx=0;
-function startFocus(){
-  focusTasks=[];
-  prospects.forEach(p=>{
-    if(p.stage>=5)return;
-    const s=getSeq(p);
-    if(s.step>=0&&s.days!==null&&s.days<=3&&!(p.seqDone||[]).includes(s.step)){
-      focusTasks.push({prospect:p,seq:SEQ[s.step],step:s.step,days:s.days});
+// =============================================
+// FOCUS MODE
+// =============================================
+let focusTasks = [], focusIdx = 0;
+function startFocus() {
+  focusTasks = [];
+  prospects.forEach(p => {
+    if (p.stage >= 5) return;
+    const s = getSeq(p);
+    if (s.step >= 0 && s.days !== null && s.days <= 3 && !(p.seqDone || []).includes(s.step)) {
+      focusTasks.push({ prospect: p, seq: SEQ[s.step], step: s.step, days: s.days });
     }
   });
-  focusTasks.sort((a,b)=>a.days-b.days);
-  if(!focusTasks.length)return;
-  focusIdx=0;renderFocus();
+  focusTasks.sort((a, b) => a.days - b.days);
+  if (!focusTasks.length) return;
+  focusIdx = 0; renderFocus();
   document.getElementById('focusOverlay').classList.remove('hidden');
 }
-function closeFocusMode(){document.getElementById('focusOverlay').classList.add('hidden');renderAll();}
-function renderFocus(){
-  const card=document.getElementById('focusCard');
-  if(focusIdx>=focusTasks.length){
-    card.innerHTML=`<div class="focus-done-screen"><div class="big">\u2713</div><h2>Termine !</h2><p>Toutes les taches du jour sont faites.</p><button class="btn btn-primary" onclick="closeFocusMode()" style="margin-top:20px">Fermer</button></div>`;
+function closeFocusMode() { document.getElementById('focusOverlay').classList.add('hidden'); renderAll(); }
+function renderFocus() {
+  const card = document.getElementById('focusCard');
+  if (focusIdx >= focusTasks.length) {
+    card.innerHTML = `<div class="focus-done-screen"><div class="big">\u2713</div><h2>Termine !</h2><p>Toutes les taches sont faites.</p><button class="btn btn-primary" onclick="closeFocusMode()" style="margin-top:20px">Fermer</button></div>`;
     return;
   }
-  const t=focusTasks[focusIdx];const p=t.prospect;const col=avatarColor(p.lastName);
-  const pct=Math.round((focusIdx/focusTasks.length)*100);
-  let dueClass='tdb-soon',dueText='J+'+t.days;
-  if(t.days<0){dueClass='tdb-late';dueText=Math.abs(t.days)+'j retard';}
-  else if(t.days===0){dueClass='tdb-today';dueText="Aujourd'hui";}
-  card.innerHTML=`
-    <div class="focus-top">
-      <div class="focus-progress"><div class="focus-bar" style="width:${pct}%"></div></div>
-      <div class="focus-prospect"><div class="focus-avatar" style="background:${col}">${initials(p)}</div><div><div class="focus-name">${p.firstName||''} ${p.lastName||''}</div><div class="focus-sub">${[p.category,p.city].filter(Boolean).join(' \u00b7 ')||'Prospect'}</div></div></div>
-      <div class="focus-task-block">
-        <div class="focus-task-icon">${t.seq.icon}</div>
-        <div class="focus-task-label">${t.seq.label}</div>
-        <div class="focus-task-desc">${t.seq.desc}</div>
-        <div class="focus-due ${dueClass}" style="margin-top:12px">${dueText}</div>
-      </div>
-    </div>
-    <div class="focus-actions">
-      <button class="focus-done-btn" onclick="focusDone()">\u2713 Fait</button>
-      <button class="focus-skip-btn" onclick="focusSkip()">Passer</button>
-    </div>`;
+  const t = focusTasks[focusIdx]; const p = t.prospect; const col = avatarColor(p.lastName);
+  const pct = Math.round((focusIdx / focusTasks.length) * 100);
+  let dueClass = 'tdb-soon', dueText = 'J+' + t.days;
+  if (t.days < 0) { dueClass = 'tdb-late'; dueText = Math.abs(t.days) + 'j retard'; }
+  else if (t.days === 0) { dueClass = 'tdb-today'; dueText = "Aujourd'hui"; }
+  card.innerHTML = `<div class="focus-top"><div class="focus-progress"><div class="focus-bar" style="width:${pct}%"></div></div><div class="focus-prospect"><div class="focus-avatar" style="background:${col}">${initials(p)}</div><div><div class="focus-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="focus-sub">${[p.category, p.city].filter(Boolean).join(' \u00b7 ') || 'Prospect'}</div></div></div><div class="focus-task-block"><div class="focus-task-icon">${t.seq.icon}</div><div class="focus-task-label">${t.seq.label}</div><div class="focus-task-desc">${t.seq.desc}</div><div class="focus-due ${dueClass}" style="margin-top:12px">${dueText}</div></div></div><div class="focus-actions"><button class="focus-done-btn" onclick="focusDone()">\u2713 Fait</button><button class="focus-skip-btn" onclick="focusSkip()">Passer</button></div>`;
 }
-function focusDone(){const t=focusTasks[focusIdx];markDone(t.prospect.id,t.step);focusIdx++;renderFocus();}
-function focusSkip(){focusIdx++;renderFocus();}
+function focusDone() { const t = focusTasks[focusIdx]; markDone(t.prospect.id, t.step); focusIdx++; renderFocus(); }
+function focusSkip() { focusIdx++; renderFocus(); }
 
-// ── IMPORT ──
-let impData=[],impHdr=[],colMap={firstName:'',lastName:'',email:'',phone:'',category:'',city:'',address:''};
-function initImport(){
-  const dz=document.getElementById('dz');if(!dz)return;
-  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
-  dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
-  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');handleFile(e.dataTransfer.files[0])});
+// =============================================
+// IMPORT (with duplicate detection)
+// =============================================
+let impData = [], impHdr = [], colMap = { firstName: '', lastName: '', email: '', phone: '', category: '', city: '', address: '', amount: '', source: '', linkedin: '' };
+function initImport() {
+  const dz = document.getElementById('dz'); if (!dz) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag') });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); handleFile(e.dataTransfer.files[0]) });
 }
-function handleFile(file){
-  if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    const wb=XLSX.read(e.target.result,{type:'binary'});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-    impHdr=(raw[0]||[]).map(String);impData=raw.slice(1).filter(r=>r.some(c=>c));
-    const auto={firstName:['prenom','first'],lastName:['nom','last'],email:['email','mail'],phone:['tel','phone','portable','mobile'],category:['profil','type','statut','secteur'],city:['ville','city'],address:['adresse','entreprise','cabinet']};
-    Object.keys(colMap).forEach(k=>{const f=impHdr.findIndex(h=>auto[k]?.some(kw=>h.toLowerCase().includes(kw)));colMap[k]=f>=0?String(f):'';});
+function handleFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'binary' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+    impHdr = (raw[0] || []).map(String); impData = raw.slice(1).filter(r => r.some(c => c));
+    const auto = { firstName: ['prenom', 'first'], lastName: ['nom', 'last'], email: ['email', 'mail'], phone: ['tel', 'phone', 'portable', 'mobile'], category: ['profil', 'type', 'statut', 'secteur'], city: ['ville', 'city'], address: ['adresse', 'entreprise', 'cabinet'], amount: ['montant', 'amount', 'ca', 'chiffre'], source: ['source', 'origine', 'canal'], linkedin: ['linkedin', 'profil linkedin'] };
+    Object.keys(colMap).forEach(k => { const f = impHdr.findIndex(h => auto[k]?.some(kw => h.toLowerCase().includes(kw))); colMap[k] = f >= 0 ? String(f) : ''; });
     showImpConfig();
-  };r.readAsBinaryString(file);
+  }; r.readAsBinaryString(file);
 }
-function showImpConfig(){
-  const labels={firstName:'Prenom',lastName:'Nom',email:'Email',phone:'Telephone',category:'Profil',city:'Ville',address:'Entreprise'};
-  const opts=`<option value="">\u2014 Ignorer \u2014</option>`+impHdr.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+function showImpConfig() {
+  const labels = { firstName: 'Prenom', lastName: 'Nom', email: 'Email', phone: 'Telephone', category: 'Profil', city: 'Ville', address: 'Entreprise', amount: 'Montant', source: 'Source', linkedin: 'LinkedIn' };
+  const opts = `<option value="">\u2014 Ignorer \u2014</option>` + impHdr.map((h, i) => `<option value="${i}">${h}</option>`).join('');
   document.getElementById('impConfig').classList.remove('hidden');
-  document.getElementById('impConfig').innerHTML=`<div class="card"><h3>Mapping \u2014 ${impData.length} lignes</h3>${Object.keys(colMap).map(k=>`<div class="map-row"><div class="map-key">${labels[k]}</div><div class="map-arr">\u2192</div><select class="map-sel" onchange="colMap['${k}']=this.value">${opts.replace(`value="${colMap[k]}"`,`value="${colMap[k]}" selected`)}</select></div>`).join('')}<div style="display:flex;gap:8px;margin-top:14px;align-items:center"><button class="btn btn-primary" onclick="doImport()">Importer ${impData.length} prospects</button><select class="fsel" id="impStage">${STAGES.map(s=>`<option value="${s.id}">${s.label}</option>`).join('')}</select></div></div>`;
-  document.getElementById('impPreview').innerHTML=`<div class="card"><h3>Apercu \u2014 5 premieres lignes</h3><div class="preview-wrap"><table><thead><tr>${impHdr.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${impData.slice(0,5).map(r=>`<tr>${impHdr.map((_,i)=>`<td>${r[i]||''}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+  document.getElementById('impConfig').innerHTML = `<div class="card"><h3>Mapping \u2014 ${impData.length} lignes</h3>${Object.keys(colMap).map(k => `<div class="map-row"><div class="map-key">${labels[k]}</div><div class="map-arr">\u2192</div><select class="map-sel" onchange="colMap['${k}']=this.value">${opts.replace(`value="${colMap[k]}"`, `value="${colMap[k]}" selected`)}</select></div>`).join('')}<div style="display:flex;gap:8px;margin-top:14px;align-items:center"><label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub)"><input type="checkbox" id="impSkipDup" checked> Ignorer doublons</label><button class="btn btn-primary" onclick="doImport()">Importer ${impData.length} prospects</button><select class="fsel" id="impStage">${STAGES.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}</select></div></div>`;
+  document.getElementById('impPreview').innerHTML = `<div class="card"><h3>Apercu</h3><div class="preview-wrap"><table><thead><tr>${impHdr.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${impData.slice(0, 5).map(r => `<tr>${impHdr.map((_, i) => `<td>${r[i] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
 }
-function doImport(){
-  const stage=parseInt(document.getElementById('impStage').value)||0;let added=0;
-  impData.forEach(row=>{
-    const p={id:uid(),stage,seqDone:[],notes:[],contactDate:null,createdAt:today()};
-    Object.keys(colMap).forEach(k=>{if(colMap[k]!=='')p[k]=String(row[parseInt(colMap[k])]||'').trim();});
-    if(p.firstName||p.lastName||p.email){prospects.push(p);added++;}
+function doImport() {
+  const stage = parseInt(document.getElementById('impStage').value) || 0;
+  const skipDup = document.getElementById('impSkipDup')?.checked;
+  let added = 0, skipped = 0;
+  impData.forEach(row => {
+    const p = { id: uid(), stage, seqDone: [], notes: [], activity: [], contactDate: null, createdAt: today(), amount: '', source: '', linkedin: '', rappelDate: '', priority: '', tags: [] };
+    Object.keys(colMap).forEach(k => { if (colMap[k] !== '') p[k] = String(row[parseInt(colMap[k])] || '').trim(); });
+    if (!p.firstName && !p.lastName && !p.email) return;
+    if (skipDup && findDuplicates(p.email, p.phone, null).length) { skipped++; return; }
+    logActivity(p, 'import', 'Importe');
+    prospects.push(p); added++;
   });
-  save();renderAll();toast(added+' prospects importes','ok');nav('kanban');
+  save(); renderAll();
+  toast(`${added} importes${skipped ? ', ' + skipped + ' doublons ignores' : ''}`, 'ok');
+  nav('kanban');
 }
 
-// ── STATS ──
-function renderStats(){
-  const el=document.getElementById('statsGrid');
-  const byStage=STAGES.map(s=>({label:s.label,n:prospects.filter(p=>p.stage===s.id).length,color:s.color}));
-  const maxS=Math.max(...byStage.map(s=>s.n),1);
-  const catMap={};prospects.forEach(p=>{if(p.category)catMap[p.category]=(catMap[p.category]||0)+1;});
-  const byCat=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,8);const maxC=Math.max(...byCat.map(s=>s[1]),1);
-  const seqN=SEQ.map((_,i)=>prospects.filter(p=>(p.seqDone||[]).includes(i)).length);const maxSq=Math.max(...seqN,1);
-  el.innerHTML=`
-    <div class="stat-card"><h3>Par etape</h3>${byStage.map(s=>`<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track"><div class="bar-fill" style="width:${s.n/maxS*100}%;background:${s.color}"></div></div><div class="bar-n">${s.n}</div></div>`).join('')}</div>
-    <div class="stat-card"><h3>Par profil</h3>${byCat.length?byCat.map(([c,n])=>`<div class="bar-row"><div class="bar-lbl">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${n/maxC*100}%;background:var(--gold)"></div></div><div class="bar-n">${n}</div></div>`).join(''):`<p style="color:var(--sub);font-size:12px">Aucune donnee</p>`}</div>
-    <div class="stat-card"><h3>Sequence \u2014 avancement</h3>${SEQ.map((s,i)=>`<div class="bar-row"><div class="bar-lbl">${s.icon} ${s.label.split('-')[0].trim()}</div><div class="bar-track"><div class="bar-fill" style="width:${seqN[i]/maxSq*100}%;background:var(--purple)"></div></div><div class="bar-n">${seqN[i]}</div></div>`).join('')}</div>
-    <div class="stat-card"><h3>Vue globale</h3><div class="sum-grid">${[['Total',prospects.length],['Taux conv.',prospects.length?Math.round(prospects.filter(p=>p.stage===5).length/prospects.length*100)+'%':'0%'],['Seq. actives',prospects.filter(p=>p.contactDate&&getSeq(p).step>=0).length],['En retard',prospects.filter(p=>{const s=getSeq(p);return s.step>=0&&s.days!==null&&s.days<0;}).length]].map(([l,v])=>`<div><div class="sum-lbl">${l}</div><div class="sum-val">${v}</div></div>`).join('')}</div></div>`;
-}
+// =============================================
+// STATS
+// =============================================
+function renderStats() {
+  const el = document.getElementById('statsGrid');
+  const byStage = STAGES.map(s => ({ label: s.label, n: prospects.filter(p => p.stage === s.id).length, color: s.color }));
+  const maxS = Math.max(...byStage.map(s => s.n), 1);
+  const catMap = {}; prospects.forEach(p => { if (p.category) catMap[p.category] = (catMap[p.category] || 0) + 1; });
+  const byCat = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 8); const maxC = Math.max(...byCat.map(s => s[1]), 1);
+  const seqN = SEQ.map((_, i) => prospects.filter(p => (p.seqDone || []).includes(i)).length); const maxSq = Math.max(...seqN, 1);
+  const srcMap = {}; prospects.forEach(p => { if (p.source) srcMap[p.source] = (srcMap[p.source] || 0) + 1; });
+  const bySrc = Object.entries(srcMap).sort((a, b) => b[1] - a[1]).slice(0, 6); const maxSrc = Math.max(...bySrc.map(s => s[1]), 1);
+  const revByStage = STAGES.map(s => { const amt = prospects.filter(p => p.stage === s.id).reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0); return { label: s.label, val: amt, color: s.color }; });
+  const maxRev = Math.max(...revByStage.map(s => s.val), 1);
 
-// ── SETTINGS ──
-function renderSettings(){
-  document.getElementById('settingsBody').innerHTML=`
-    <div class="set-card">
-      <div class="set-card-title">Compte</div>
-      <div class="set-card-sub">Connecte en tant que <strong style="color:var(--gold)">${currentUser?.name||''}</strong> (${currentUser?.email||''})</div>
-      <button class="btn btn-ghost" onclick="doLogout()">Se deconnecter</button>
+  // Priority breakdown
+  const prioMap = { hot: 0, warm: 0, cold: 0, '': 0 };
+  prospects.forEach(p => { prioMap[p.priority || ''] = (prioMap[p.priority || ''] || 0) + 1; });
+
+  // Conversion funnel
+  const funnelStages = STAGES.filter(s => s.id !== 6);
+  const funnelData = funnelStages.map(s => prospects.filter(p => p.stage >= s.id && p.stage !== 6).length);
+  const maxFn = Math.max(...funnelData, 1);
+
+  el.innerHTML = `
+    <div class="stat-card"><h3>Entonnoir de conversion</h3>${funnelStages.map((s, i) => `<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track" style="height:8px"><div class="bar-fill" style="width:${funnelData[i] / maxFn * 100}%;background:${s.color};height:8px;border-radius:4px"></div></div><div class="bar-n">${funnelData[i]}</div></div>`).join('')}</div>
+    <div class="stat-card"><h3>Par etape</h3>${byStage.map(s => `<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track"><div class="bar-fill" style="width:${s.n / maxS * 100}%;background:${s.color}"></div></div><div class="bar-n">${s.n}</div></div>`).join('')}</div>
+    <div class="stat-card"><h3>Par profil</h3>${byCat.length ? byCat.map(([c, n]) => `<div class="bar-row"><div class="bar-lbl">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${n / maxC * 100}%;background:var(--gold)"></div></div><div class="bar-n">${n}</div></div>`).join('') : `<p style="color:var(--sub);font-size:12px">Aucune donnee</p>`}</div>
+    <div class="stat-card"><h3>Par source</h3>${bySrc.length ? bySrc.map(([c, n]) => `<div class="bar-row"><div class="bar-lbl">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${n / maxSrc * 100}%;background:var(--cyan)"></div></div><div class="bar-n">${n}</div></div>`).join('') : `<p style="color:var(--sub);font-size:12px">Aucune donnee</p>`}</div>
+    <div class="stat-card"><h3>Par priorite</h3>
+      <div class="bar-row"><div class="bar-lbl">Chaud</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap.hot / Math.max(prospects.length, 1) * 100}%;background:#ef4444"></div></div><div class="bar-n">${prioMap.hot}</div></div>
+      <div class="bar-row"><div class="bar-lbl">Tiede</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap.warm / Math.max(prospects.length, 1) * 100}%;background:#f59e0b"></div></div><div class="bar-n">${prioMap.warm}</div></div>
+      <div class="bar-row"><div class="bar-lbl">Froid</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap.cold / Math.max(prospects.length, 1) * 100}%;background:#22d3ee"></div></div><div class="bar-n">${prioMap.cold}</div></div>
+      <div class="bar-row"><div class="bar-lbl">Non defini</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap[''] / Math.max(prospects.length, 1) * 100}%;background:var(--hint)"></div></div><div class="bar-n">${prioMap['']}</div></div>
     </div>
-    <div class="set-card"><div class="set-card-title">Pipeline</div><div class="set-card-sub">Modifier les etapes et la sequence.</div><button class="btn btn-primary" onclick="nav('kanban');setTimeout(openPipelineEditor,100)">Ouvrir l'editeur</button></div>
-    <div class="set-card"><div class="set-card-title">Nom de l'outil</div><div class="set-card-sub">Personnaliser le titre.</div><div style="display:flex;gap:8px;margin-top:10px"><input id="crmName" value="${localStorage.getItem(userKey('name'))||'CRM'}" style="flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:8px 11px;color:var(--text);font-family:inherit;font-size:13px"><button class="btn btn-primary btn-sm" onclick="saveName()">Enregistrer</button></div></div>
+    <div class="stat-card"><h3>Montant par etape (EUR)</h3>${revByStage.map(s => `<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track"><div class="bar-fill" style="width:${s.val / maxRev * 100}%;background:${s.color}"></div></div><div class="bar-n">${s.val ? Math.round(s.val / 1000) + 'k' : 0}</div></div>`).join('')}</div>
+    <div class="stat-card"><h3>Sequence</h3>${SEQ.map((s, i) => `<div class="bar-row"><div class="bar-lbl">${s.icon} ${s.label.split('-')[0].trim()}</div><div class="bar-track"><div class="bar-fill" style="width:${seqN[i] / maxSq * 100}%;background:var(--purple)"></div></div><div class="bar-n">${seqN[i]}</div></div>`).join('')}</div>
+    <div class="stat-card"><h3>Vue globale</h3><div class="sum-grid">${[
+      ['Total', prospects.length],
+      ['Taux conv.', prospects.length ? Math.round(prospects.filter(p => p.stage === 5).length / prospects.length * 100) + '%' : '0%'],
+      ['Seq. actives', prospects.filter(p => p.contactDate && getSeq(p).step >= 0).length],
+      ['En retard', prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }).length],
+      ['Montant total', prospects.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0).toLocaleString('fr-FR') + ' EUR'],
+      ['Rappels actifs', prospects.filter(p => p.rappelDate && daysFromNow(p.rappelDate) <= 3).length]
+    ].map(([l, v]) => `<div><div class="sum-lbl">${l}</div><div class="sum-val">${v}</div></div>`).join('')}</div></div>`;
+}
+
+// =============================================
+// SETTINGS
+// =============================================
+function renderSettings() {
+  const obj = getObjectives();
+  const tpls = getTemplates();
+  document.getElementById('settingsBody').innerHTML = `
+    <div class="set-card"><div class="set-card-title">Compte</div><div class="set-card-sub">Connecte en tant que <strong style="color:var(--gold)">${currentUser?.name || ''}</strong> (${currentUser?.email || ''})</div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="doLogout()">Se deconnecter</button></div><div style="margin-top:10px;font-size:11px;color:var(--hint)">${useFirebase ? 'Mode cloud - donnees synchronisees sur tous vos appareils' : 'Mode local - donnees stockees dans ce navigateur uniquement'}</div></div>
+    <div class="set-card"><div class="set-card-title">Pipeline</div><div class="set-card-sub">Modifier etapes, sequence et profils.</div><button class="btn btn-primary" onclick="nav('kanban');setTimeout(openPipelineEditor,100)">Ouvrir l'editeur</button></div>
+
+    <div class="set-card"><div class="set-card-title">Objectifs mensuels</div><div class="set-card-sub">Definissez vos cibles. La progression s'affiche sur le Dashboard.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+        <div class="field"><label>Nouveaux prospects</label><input type="number" id="objNew" value="${obj.newProspects}" min="0"></div>
+        <div class="field"><label>Signatures</label><input type="number" id="objSigned" value="${obj.signed}" min="0"></div>
+        <div class="field"><label>CA cible (EUR)</label><input type="number" id="objRevenue" value="${obj.revenue}" min="0"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveObjectivesUI()">Enregistrer les objectifs</button>
+    </div>
+
+    <div class="set-card"><div class="set-card-title">Templates Email / SMS</div><div class="set-card-sub">Variables disponibles : <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{prenom}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{nom}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{entreprise}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{ville}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{email}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{telephone}</code></div>
+      <div class="tpl-list" id="tplList">
+        ${tpls.map((t, i) => `<div class="tpl-item">
+          <div class="tpl-head">
+            <input class="tpl-name-input" data-i="${i}" data-k="name" value="${(t.name || '').replace(/"/g, '&quot;')}" placeholder="Nom du template">
+            <select class="tpl-type-sel" data-i="${i}" data-k="type"><option value="email" ${t.type === 'email' ? 'selected' : ''}>Email</option><option value="sms" ${t.type === 'sms' ? 'selected' : ''}>SMS</option><option value="linkedin" ${t.type === 'linkedin' ? 'selected' : ''}>LinkedIn</option></select>
+            <button class="btn btn-danger btn-sm" onclick="tplRemove(${i})">&#10005;</button>
+          </div>
+          <textarea class="tpl-content" data-i="${i}" data-k="content" placeholder="Contenu...">${(t.content || '').replace(/</g, '&lt;')}</textarea>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="tplAdd()">+ Ajouter un template</button>
+      <button class="btn btn-primary btn-sm" style="margin-left:6px" onclick="saveTemplatesUI()">Enregistrer les templates</button>
+    </div>
+
+    <div class="set-card"><div class="set-card-title">Notifications</div><div class="set-card-sub">Recevoir une alerte navigateur quand des taches sont en retard.</div><button class="btn btn-ghost btn-sm" onclick="requestNotifPermission();toast('Permission demandee','ok')">Activer les notifications</button></div>
+
+    <div class="set-card"><div class="set-card-title">Raccourcis clavier</div><div class="set-card-sub">Naviguez plus vite.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:11px;color:var(--sub)">${[['1-8', 'Naviguer entre les vues'], ['N', 'Nouveau prospect'], ['/', 'Rechercher'], ['Esc', 'Fermer modale']].map(([k, d]) => `<div><kbd style="background:var(--s3);border:1px solid var(--b2);border-radius:4px;padding:2px 6px;font-size:10px;font-family:inherit;color:var(--gold)">${k}</kbd> ${d}</div>`).join('')}</div></div>
+    <div class="set-card"><div class="set-card-title">Sauvegarde / Restauration</div><div class="set-card-sub">Exporter ou importer toutes vos donnees.</div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-ghost" onclick="backupAll()">Telecharger backup</button><button class="btn btn-ghost" onclick="document.getElementById('restoreFile').click()">Restaurer un backup</button><input type="file" id="restoreFile" style="display:none" accept=".json" onchange="restoreAll(this.files[0])"></div></div>
+    <div class="set-card"><div class="set-card-title">Nom de l'outil</div><div class="set-card-sub">Personnaliser le titre.</div><div style="display:flex;gap:8px;margin-top:10px"><input id="crmName" value="${localStorage.getItem(userKey('name')) || 'CRM'}" style="flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:8px 11px;color:var(--text);font-family:inherit;font-size:13px"><button class="btn btn-primary btn-sm" onclick="saveName()">Enregistrer</button></div></div>
     <div class="set-card danger-zone"><div class="set-card-title" style="color:var(--red)">Zone de danger</div><div class="set-card-sub">Action irreversible.</div><button class="btn btn-danger" onclick="resetAll()">Effacer tous les prospects</button></div>`;
 }
-function saveName(){const n=document.getElementById('crmName').value.trim()||'CRM';localStorage.setItem(userKey('name'),n);document.querySelector('.sb-logo').textContent=n[0]||'C';toast('Nom mis a jour','ok');}
-function resetAll(){if(!confirm('Effacer TOUS les prospects ?'))return;prospects=[];save();renderAll();toast('Base videe','ok');}
 
-// ── PIPELINE EDITOR ──
-let peCurrentTab='stages';
-function openPipelineEditor(){peCurrentTab='stages';document.getElementById('pipelineModal').classList.remove('hidden');peTab('stages');}
-function closePipelineEditor(){document.getElementById('pipelineModal').classList.add('hidden');renderAll();}
-function peTab(t){
-  peCurrentTab=t;
-  ['stages','seq','cats'].forEach(x=>{document.getElementById('pe-'+x).classList.toggle('hidden',x!==t);document.getElementById('pet-'+x).classList.toggle('active',x===t);});
-  peRender();
+function saveObjectivesUI() {
+  const o = {
+    newProspects: parseInt(document.getElementById('objNew').value) || 0,
+    signed: parseInt(document.getElementById('objSigned').value) || 0,
+    revenue: parseInt(document.getElementById('objRevenue').value) || 0
+  };
+  saveObjectives(o);
+  toast('Objectifs sauvegardes', 'ok');
 }
-function peRender(){if(peCurrentTab==='stages')peRenderStages();if(peCurrentTab==='seq')peRenderSeq();if(peCurrentTab==='cats')peRenderCats();}
-function peRenderStages(){
-  document.getElementById('pe-stage-list').innerHTML=STAGES.map((s,i)=>`
-    <div class="pe-stage-row">
-      <input type="color" value="${s.color}" onchange="STAGES[${i}].color=this.value;saveConfig();renderAll()" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:8px;padding:0;flex-shrink:0">
-      <div style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0"></div>
-      <input class="pe-input" style="flex:1" value="${s.label}" placeholder="Nom" onchange="STAGES[${i}].label=this.value;saveConfig();renderAll()">
-      <span style="font-size:11px;color:var(--hint);white-space:nowrap">${prospects.filter(p=>p.stage===s.id).length}</span>
-      ${STAGES.length>2?`<button class="btn btn-danger btn-sm" onclick="peRemoveStage(${i})">&#10005;</button>`:`<div style="width:52px"></div>`}
-    </div>`).join('');
-}
-function peRenderSeq(){
-  document.getElementById('pe-seq-list').innerHTML=SEQ.map((s,i)=>`
-    <div class="pe-seq-card">
-      <div class="pe-seq-top">
-        <select class="pe-icon-sel" onchange="SEQ[${i}].icon=this.value;saveConfig()">${['M','S','L','T','C','H'].map(ic=>`<option ${s.icon===ic?'selected':''}>${ic}</option>`).join('')}</select>
-        <input class="pe-input" style="flex:1" value="${s.label}" onchange="SEQ[${i}].label=this.value;saveConfig()">
-        <div class="pe-day"><span>Jour +</span><input type="number" value="${s.day}" min="0" max="365" onchange="SEQ[${i}].day=parseInt(this.value)||0;saveConfig()"></div>
-        ${SEQ.length>1?`<button class="btn btn-danger btn-sm" onclick="peRemoveSeq(${i})">&#10005;</button>`:''}
-      </div>
-      <input class="pe-desc" value="${s.desc}" placeholder="Description..." onchange="SEQ[${i}].desc=this.value;saveConfig()">
-    </div>`).join('');
-}
-function peRenderCats(){
-  document.getElementById('pe-cat-tags').innerHTML=CATS.map((c,i)=>`<div class="cat-tag"><span>${c}</span><button onclick="peRemoveCat(${i})">&#10005;</button></div>`).join('');
-}
-function peAddStage(){STAGES.push({id:STAGES.length,label:'Nouvelle etape',color:'#8b6cf6'});saveConfig();peRenderStages();renderAll();}
-function peRemoveStage(i){if(STAGES.length<=2)return;if(!confirm('Supprimer cette etape ?'))return;prospects.forEach(p=>{if(p.stage===STAGES[i].id)p.stage=0;});STAGES.splice(i,1);STAGES.forEach((s,j)=>s.id=j);save();saveConfig();peRenderStages();renderAll();}
-function peAddSeq(){SEQ.push({day:SEQ.length?Math.max(...SEQ.map(s=>s.day))+5:0,type:'email',icon:'M',label:'Nouveau touchpoint',desc:'Description...'});saveConfig();peRenderSeq();}
-function peRemoveSeq(i){SEQ.splice(i,1);saveConfig();peRenderSeq();}
-function peAddCat(){const v=document.getElementById('peNewCat').value.trim();if(v&&!CATS.includes(v)){CATS.push(v);document.getElementById('peNewCat').value='';saveConfig();peRenderCats();}}
-function peRemoveCat(i){CATS.splice(i,1);saveConfig();peRenderCats();}
 
-// ── EXPORT ──
-function exportCSV(){
-  if(!prospects.length){toast('Aucun prospect','err');return;}
-  const h=['id','Prenom','Nom','Profil','Email','Telephone','Ville','Entreprise','Etape','1er contact','Cree le'];
-  const rows=prospects.map(p=>[p.id,p.firstName||'',p.lastName||'',p.category||'',p.email||'',p.phone||'',p.city||'',p.address||'',STAGES[p.stage]?.label||'',p.contactDate||'',p.createdAt||'']);
-  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download=`prospects_${today()}.csv`;a.click();toast('Export lance','ok');
+function tplAdd() {
+  const tpls = getTemplates();
+  tpls.push({ name: 'Nouveau template', type: 'email', content: 'Bonjour {prenom},\n\n' });
+  saveTemplates(tpls);
+  renderSettings();
 }
-function toast(msg,type='ok'){const t=document.createElement('div');t.className=`toast t-${type}`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600);}
+function tplRemove(i) {
+  if (!confirm('Supprimer ce template ?')) return;
+  const tpls = getTemplates();
+  tpls.splice(i, 1);
+  saveTemplates(tpls);
+  renderSettings();
+}
+function saveTemplatesUI() {
+  const tpls = getTemplates();
+  document.querySelectorAll('#tplList [data-i]').forEach(el => {
+    const i = parseInt(el.dataset.i); const k = el.dataset.k;
+    if (tpls[i]) tpls[i][k] = el.value;
+  });
+  saveTemplates(tpls);
+  toast('Templates sauvegardes', 'ok');
+}
+function saveName() { const n = document.getElementById('crmName').value.trim() || 'CRM'; localStorage.setItem(userKey('name'), n); document.querySelector('.sb-logo').textContent = n[0] || 'C'; toast('Nom mis a jour', 'ok'); }
+function resetAll() { if (!confirm('Effacer TOUS les prospects ?')) return; prospects = []; save(); renderAll(); toast('Base videe', 'ok'); }
 
-// ── NAV ──
-const TITLES={kanban:'Pipeline',list:'Contacts',tasks:'Taches du jour',import:'Import',stats:'Statistiques',settings:'Parametres'};
-function nav(name){
-  currentTab=name;
-  ['kanban','list','tasks','import','stats','settings'].forEach(t=>{document.getElementById('view-'+t).classList.toggle('hidden',t!==name);document.getElementById('nb-'+t)?.classList.toggle('active',t===name);});
-  document.getElementById('topTitle').textContent=TITLES[name]||name;
+// Backup / Restore
+function backupAll() {
+  const data = { prospects, config: { stages: STAGES, seq: SEQ, cats: CATS }, exportDate: nowISO(), version: 2 };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `crm_backup_${today()}.json`;
+  a.click();
+  toast('Backup telecharge', 'ok');
+}
+function restoreAll(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.prospects || !Array.isArray(data.prospects)) throw new Error('Format invalide');
+      if (!confirm(`Restaurer ${data.prospects.length} prospects ? Cela remplacera vos donnees actuelles.`)) return;
+      prospects = data.prospects;
+      if (data.config) {
+        if (data.config.stages) STAGES = data.config.stages;
+        if (data.config.seq) SEQ = data.config.seq;
+        if (data.config.cats) CATS = data.config.cats;
+        saveConfig();
+      }
+      currentId = Math.max(...prospects.map(p => p.id || 0), 0);
+      save();
+      renderAll();
+      toast(`${prospects.length} prospects restaures`, 'ok');
+    } catch (err) {
+      toast('Fichier invalide', 'err');
+    }
+  };
+  r.readAsText(file);
+}
+
+// =============================================
+// PIPELINE EDITOR
+// =============================================
+let peCurrentTab = 'stages';
+function openPipelineEditor() { peCurrentTab = 'stages'; document.getElementById('pipelineModal').classList.remove('hidden'); peTab('stages'); }
+function closePipelineEditor() { document.getElementById('pipelineModal').classList.add('hidden'); renderAll(); }
+function peTab(t) { peCurrentTab = t; ['stages', 'seq', 'cats'].forEach(x => { document.getElementById('pe-' + x).classList.toggle('hidden', x !== t); document.getElementById('pet-' + x).classList.toggle('active', x === t); }); peRender(); }
+function peRender() { if (peCurrentTab === 'stages') peRenderStages(); if (peCurrentTab === 'seq') peRenderSeq(); if (peCurrentTab === 'cats') peRenderCats(); }
+function peRenderStages() { document.getElementById('pe-stage-list').innerHTML = STAGES.map((s, i) => `<div class="pe-stage-row"><input type="color" value="${s.color}" onchange="STAGES[${i}].color=this.value;saveConfig();renderAll()" style="width:32px;height:32px;border:none;background:none;cursor:pointer;border-radius:8px;padding:0;flex-shrink:0"><div style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0"></div><input class="pe-input" style="flex:1" value="${s.label}" onchange="STAGES[${i}].label=this.value;saveConfig();renderAll()"><span style="font-size:11px;color:var(--hint)">${prospects.filter(p => p.stage === s.id).length}</span>${STAGES.length > 2 ? `<button class="btn btn-danger btn-sm" onclick="peRemoveStage(${i})">&#10005;</button>` : `<div style="width:52px"></div>`}</div>`).join(''); }
+function peRenderSeq() { document.getElementById('pe-seq-list').innerHTML = SEQ.map((s, i) => `<div class="pe-seq-card"><div class="pe-seq-top"><select class="pe-icon-sel" onchange="SEQ[${i}].icon=this.value;saveConfig()">${['M', 'S', 'L', 'T', 'C', 'H'].map(ic => `<option ${s.icon === ic ? 'selected' : ''}>${ic}</option>`).join('')}</select><input class="pe-input" style="flex:1" value="${s.label}" onchange="SEQ[${i}].label=this.value;saveConfig()"><div class="pe-day"><span>J+</span><input type="number" value="${s.day}" min="0" max="365" onchange="SEQ[${i}].day=parseInt(this.value)||0;saveConfig()"></div>${SEQ.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="peRemoveSeq(${i})">&#10005;</button>` : ''}</div><input class="pe-desc" value="${s.desc}" placeholder="Description..." onchange="SEQ[${i}].desc=this.value;saveConfig()"></div>`).join(''); }
+function peRenderCats() { document.getElementById('pe-cat-tags').innerHTML = CATS.map((c, i) => `<div class="cat-tag"><span>${c}</span><button onclick="peRemoveCat(${i})">&#10005;</button></div>`).join(''); }
+function peAddStage() { STAGES.push({ id: STAGES.length, label: 'Nouvelle etape', color: '#8b6cf6' }); saveConfig(); peRenderStages(); renderAll(); }
+function peRemoveStage(i) { if (STAGES.length <= 2) return; if (!confirm('Supprimer cette etape ?')) return; prospects.forEach(p => { if (p.stage === STAGES[i].id) p.stage = 0; }); STAGES.splice(i, 1); STAGES.forEach((s, j) => s.id = j); save(); saveConfig(); peRenderStages(); renderAll(); }
+function peAddSeq() { SEQ.push({ day: SEQ.length ? Math.max(...SEQ.map(s => s.day)) + 5 : 0, type: 'email', icon: 'M', label: 'Nouveau touchpoint', desc: 'Description...' }); saveConfig(); peRenderSeq(); }
+function peRemoveSeq(i) { SEQ.splice(i, 1); saveConfig(); peRenderSeq(); }
+function peAddCat() { const v = document.getElementById('peNewCat').value.trim(); if (v && !CATS.includes(v)) { CATS.push(v); document.getElementById('peNewCat').value = ''; saveConfig(); peRenderCats(); } }
+function peRemoveCat(i) { CATS.splice(i, 1); saveConfig(); peRenderCats(); }
+
+// =============================================
+// EXPORT
+// =============================================
+function exportCSV() {
+  if (!prospects.length) { toast('Aucun prospect', 'err'); return; }
+  const h = ['id', 'Prenom', 'Nom', 'Profil', 'Priorite', 'Email', 'Telephone', 'Ville', 'Entreprise', 'Etape', 'Montant', 'Source', 'LinkedIn', 'Tags', '1er contact', 'Rappel', 'Cree le', 'Derniere interaction'];
+  const rows = prospects.map(p => [p.id, p.firstName || '', p.lastName || '', p.category || '', p.priority || '', p.email || '', p.phone || '', p.city || '', p.address || '', STAGES[p.stage]?.label || '', p.amount || '', p.source || '', p.linkedin || '', (p.tags || []).join(', '), p.contactDate || '', p.rappelDate || '', p.createdAt || '', p.lastInteraction || '']);
+  const csv = [h, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = `prospects_${today()}.csv`; a.click(); toast('Export lance', 'ok');
+}
+function toast(msg, type = 'ok') { const t = document.createElement('div'); t.className = `toast t-${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+
+// =============================================
+// NAV
+// =============================================
+const TITLES = { dashboard: 'Dashboard', kanban: 'Pipeline', list: 'Contacts', tasks: 'Taches du jour', calendar: 'Calendrier', import: 'Import', stats: 'Statistiques', settings: 'Parametres' };
+function nav(name) {
+  currentTab = name;
+  ['dashboard', 'kanban', 'list', 'tasks', 'calendar', 'import', 'stats', 'settings'].forEach(t => { document.getElementById('view-' + t).classList.toggle('hidden', t !== name); document.getElementById('nb-' + t)?.classList.toggle('active', t === name); });
+  document.getElementById('topTitle').textContent = TITLES[name] || name;
+  // Close mobile menu on navigation
+  document.body.classList.remove('mobile-menu-open');
   renderAll();
 }
-function renderAll(){renderKPI();if(currentTab==='kanban')renderKanban();if(currentTab==='list')renderList();if(currentTab==='tasks')renderTasks();if(currentTab==='stats')renderStats();if(currentTab==='settings')renderSettings();}
+function renderAll() { renderKPI(); if (currentTab === 'dashboard') renderDashboard(); if (currentTab === 'kanban') renderKanban(); if (currentTab === 'list') renderList(); if (currentTab === 'tasks') renderTasks(); if (currentTab === 'calendar') renderCalendar(); if (currentTab === 'stats') renderStats(); if (currentTab === 'settings') renderSettings(); }
 
-// ── INIT ──
-(function init(){
-  const session=Auth.getSession();
-  if(session){startApp(session);}
-  else{showAuth('login');}
+// =============================================
+// INIT
+// =============================================
+(function init() {
+  if (useFirebase) {
+    firebaseAuth.onAuthStateChanged(async user => {
+      if (user) {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const name = userDoc.exists ? userDoc.data().name : user.displayName || user.email.split('@')[0];
+        await startApp({ uid: user.uid, email: user.email, name });
+      } else {
+        showAuth('login');
+      }
+    });
+  } else {
+    const session = localStorage.getItem('crm_session');
+    if (session) startApp(JSON.parse(session));
+    else showAuth('login');
+  }
 })();
 </script>
 </body>
