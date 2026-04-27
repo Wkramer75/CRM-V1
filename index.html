@@ -686,29 +686,25 @@ tbody tr.selected td{background:#c9a96e08}
   <div class="kpi-strip" id="kpiStrip"></div>
   <div id="content">
     <div class="view hidden" id="view-dashboard">
-      <div class="tuto-box" id="tuto-dashboard" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Dashboard</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vue d'ensemble de votre activite.</strong> Le Dashboard regroupe les informations essentielles : entonnoir de conversion, taches a venir, activite recente, prospects chauds et progression de vos objectifs mensuels.<ul><li>Cliquez sur n'importe quel element pour acceder au detail du prospect.</li><li>Le bouton <strong>Mode Focus</strong> lance l'enchainement automatique de vos taches.</li><li>Les <strong>objectifs mensuels</strong> se configurent dans Parametres.</li></ul></div></div>
+      <div class="tuto-box" id="tuto-dashboard" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Dashboard</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vue d'ensemble de votre prospection.</strong> Pipeline, taches a venir et activite recente.<ul><li>Cliquez sur n'importe quel element pour ouvrir la fiche prospect.</li><li>Le bouton <strong>Mode Focus</strong> enchaine les appels a passer sans distraction.</li><li>La cadence des appels suit la sequence J+0, J+1, J+2, J+3, J+4, J+5 (6 appels max).</li></ul></div></div>
       <div class="view-body" style="overflow-y:auto;flex:1" id="dashBody"></div>
     </div>
     <div class="view" id="view-kanban">
-      <div class="tuto-box" id="tuto-kanban" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Pipeline</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vue Kanban de vos prospects par etape.</strong><ul><li><strong>Glissez-deposez</strong> les cartes entre les colonnes pour changer leur etape.</li><li>Cliquez sur une carte pour <strong>editer le prospect</strong>.</li><li>Filtrez par <strong>profil</strong> ou <strong>priorite</strong> en haut.</li><li>Le point colore en haut a droite indique la priorite (rouge=chaud, orange=tiede, cyan=froid).</li><li>La barre de score sous l'avatar montre l'engagement (0-100).</li><li>Bouton <strong>Gerer le pipeline</strong> pour personnaliser etapes/sequence/profils.</li></ul></div></div>
+      <div class="tuto-box" id="tuto-kanban" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser le Pipeline</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Pipeline des appels.</strong> Chaque etape represente l'appel en cours (Nouveau, Appel 1 a 6, Booke, Signe, Perdu, Inactif).<ul><li><strong>Glissez-deposez</strong> les cartes entre colonnes pour changer manuellement l'etape.</li><li>Cliquez sur une carte pour ouvrir la fiche et enregistrer un appel.</li><li>Le chip indique la prochaine action attendue (J+N ou retard).</li></ul></div></div>
       <div class="view-toolbar">
-        <span class="vt-label">Filtrer</span>
-        <select class="fsel" id="kbCat" onchange="renderKanban()"><option value="">Tous les profils</option></select>
-        <select class="fsel" id="kbPriority" onchange="renderKanban()"><option value="">Toutes priorites</option><option value="hot">Chaud</option><option value="warm">Tiede</option><option value="cold">Froid</option></select>
         <div class="vt-count" id="kbCount">0 prospects</div>
-        <button class="btn btn-ghost btn-sm" onclick="openPipelineEditor()" style="margin-left:8px">Gerer le pipeline</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost btn-sm" onclick="openPipelineEditor()">Gerer le pipeline</button>
       </div>
       <div class="view-body" id="kanbanBody"></div>
     </div>
     <div class="view hidden" id="view-list">
-      <div class="tuto-box" id="tuto-list" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser les Contacts</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Liste complete et triable de vos prospects.</strong><ul><li>Cliquez sur un <strong>en-tete de colonne</strong> pour trier (clic a nouveau pour inverser).</li><li>Filtrez par <strong>etape, profil, priorite</strong> en haut.</li><li><strong>Cochez plusieurs prospects</strong> pour des actions groupees (changer etape, supprimer).</li><li>Le crayon edite, la croix supprime.</li><li>La colonne <strong>Seq.</strong> indique l'avancement de la sequence (J+x ou jours de retard).</li></ul></div></div>
+      <div class="tuto-box" id="tuto-list" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment utiliser les Contacts</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Liste complete et triable de vos prospects.</strong><ul><li>Cliquez sur un <strong>en-tete de colonne</strong> pour trier.</li><li>Filtrez par <strong>etape</strong> ou <strong>source</strong> en haut.</li><li><strong>Cochez plusieurs prospects</strong> pour des actions groupees.</li><li>Cliquez sur un numero pour lancer l'appel directement.</li></ul></div></div>
       <div class="view-toolbar" id="listToolbar">
         <span class="vt-label">Etape</span>
         <select class="fsel" id="lstStage" onchange="renderList()"><option value="">Toutes</option></select>
-        <span class="vt-label">Profil</span>
-        <select class="fsel" id="lstCat" onchange="renderList()"><option value="">Tous</option></select>
-        <span class="vt-label">Priorite</span>
-        <select class="fsel" id="lstPriority" onchange="renderList()"><option value="">Toutes</option><option value="hot">Chaud</option><option value="warm">Tiede</option><option value="cold">Froid</option></select>
+        <span class="vt-label">Source</span>
+        <select class="fsel" id="lstCat" onchange="renderList()"><option value="">Toutes</option></select>
         <div class="vt-count" id="lstCount">0</div>
       </div>
       <div id="bulkBar" class="bulk-bar hidden">
@@ -737,7 +733,7 @@ tbody tr.selected td{background:#c9a96e08}
       </div>
     </div>
     <div class="view hidden" id="view-tasks">
-      <div class="tuto-box" id="tuto-tasks" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment gerer vos taches</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Toutes les actions a faire dans les 3 prochains jours.</strong><ul><li>Les <strong>taches sequence</strong> proviennent de votre cadence de prospection (J+0, J+5...).</li><li>Les <strong>rappels</strong> programmes apparaissent avec une icone horloge.</li><li><strong>Cliquez sur la coche</strong> pour valider une tache.</li><li>Le <strong>Mode Focus</strong> vous fait enchainer les taches une par une, sans distraction.</li><li>Les badges colores indiquent l'urgence : <strong>rouge</strong>=retard, <strong>orange</strong>=aujourd'hui, <strong>or</strong>=a venir.</li></ul></div></div>
+      <div class="tuto-box" id="tuto-tasks" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment gerer vos taches</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Vos appels a passer dans les 3 prochains jours.</strong><ul><li>La sequence suit la cadence J+0 a J+5 (6 appels max).</li><li>Cliquez sur la coche pour ouvrir la <strong>boite d'appel</strong> (timer + outcome).</li><li>Le <strong>Mode Focus</strong> enchaine les appels avec raccourcis 1/2/3/4 pour NRP/Recontacter/Booke/Non qualifie et Entree pour valider.</li><li>Badges : <strong>rouge</strong>=retard, <strong>orange</strong>=aujourd'hui, <strong>or</strong>=a venir.</li></ul></div></div>
       <div class="view-body" id="tasksBody" style="overflow-y:auto;flex:1;padding:0"></div>
     </div>
     <div class="view hidden" id="view-calendar">
@@ -745,11 +741,11 @@ tbody tr.selected td{background:#c9a96e08}
       <div class="view-body" id="calendarBody"></div>
     </div>
     <div class="view hidden" id="view-stats">
-      <div class="tuto-box" id="tuto-stats" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment lire les Statistiques</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Analyse complete de votre pipeline.</strong><ul><li><strong>Entonnoir de conversion :</strong> nombre de prospects ayant atteint chaque etape (cumulatif).</li><li><strong>Par etape/profil/source/priorite :</strong> repartition de votre base.</li><li><strong>Montant par etape :</strong> valeur monetaire (en milliers EUR) du pipeline.</li><li><strong>Sequence :</strong> nombre de prospects ayant valide chaque touchpoint.</li><li><strong>Vue globale :</strong> KPIs cles synthetiques.</li></ul></div></div>
+      <div class="tuto-box" id="tuto-stats" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment lire les Statistiques</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Analytics Setter.</strong><ul><li><strong>Taux de contact :</strong> % de prospects ayant recu au moins 1 appel.</li><li><strong>Taux de book :</strong> % de bookes parmi les contactes.</li><li><strong>Appels moyen avant book :</strong> efficacite de la cadence.</li><li><strong>Top objections :</strong> raisons les plus frequentes de Non qualifie.</li><li><strong>Heatmap :</strong> vos meilleurs creneaux horaires d'appel.</li><li><strong>Performance par source :</strong> quelles sources convertissent le mieux.</li></ul></div></div>
       <div class="view-body"><div class="stats-grid" id="statsGrid"></div></div>
     </div>
     <div class="view hidden" id="view-settings">
-      <div class="tuto-box" id="tuto-settings" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment configurer le CRM</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Personnalisation et gestion du compte.</strong><ul><li><strong>Compte :</strong> mode cloud (sync multi-appareils) ou local.</li><li><strong>Pipeline :</strong> personnaliser etapes, sequence et profils.</li><li><strong>Objectifs :</strong> definir vos cibles mensuelles (nouveaux, signes, CA).</li><li><strong>Templates :</strong> emails/SMS reutilisables avec variables {prenom}, {nom}, {entreprise}.</li><li><strong>Raccourcis clavier :</strong> <kbd>1-8</kbd> navigation, <kbd>N</kbd> nouveau, <kbd>/</kbd> rechercher, <kbd>Esc</kbd> fermer.</li><li><strong>Sauvegarde :</strong> exporter/importer toutes vos donnees en JSON.</li></ul></div></div>
+      <div class="tuto-box" id="tuto-settings" onclick="if(event.target.closest('.tuto-head'))this.classList.toggle('open')"><div class="tuto-head"><div class="tuto-icon">?</div><div class="tuto-title">Comment configurer le CRM</div><div class="tuto-arrow">&#9660;</div></div><div class="tuto-body"><strong>Personnalisation et gestion du compte.</strong><ul><li><strong>Compte :</strong> mode cloud (sync multi-appareils) ou local.</li><li><strong>Pipeline :</strong> personnaliser etapes, sequence et sources.</li><li><strong>Templates :</strong> emails/SMS reutilisables avec variables {prenom}, {nom}.</li><li><strong>Raccourcis clavier :</strong> <kbd>1-8</kbd> navigation, <kbd>N</kbd> nouveau, <kbd>1-4</kbd> outcome d'appel, <kbd>Entree</kbd> valider, <kbd>Esc</kbd> fermer.</li><li><strong>Sauvegarde :</strong> exporter/importer toutes vos donnees en JSON.</li></ul></div></div>
       <div class="view-body" id="settingsBody"></div>
     </div>
   </div>
@@ -821,6 +817,11 @@ tbody tr.selected td{background:#c9a96e08}
     <div class="modal-body" id="mBody"></div>
     <div class="modal-footer" id="mFooter"></div>
   </div>
+</div>
+
+<!-- CALL DIALOG -->
+<div class="overlay hidden" id="callOverlay" onclick="if(event.target===this)closeCallDialog()">
+  <div class="modal" id="callDialog" style="width:500px;max-width:100%"></div>
 </div>
 
 <!-- SYNC INDICATOR -->
@@ -1134,12 +1135,73 @@ function saveConfig() {
   Sync.saveConfig();
 }
 
+// Stage constants for the new pipeline
+const STAGE_NEW = 0, STAGE_CALL_1 = 1, STAGE_CALL_6 = 6, STAGE_BOOKED = 7, STAGE_SIGNED = 8, STAGE_LOST = 9, STAGE_INACTIVE = 10;
+const isClosed = (id) => id >= STAGE_SIGNED;
+const isActive = (id) => id < STAGE_SIGNED;
+const isCallStage = (id) => id >= STAGE_CALL_1 && id <= STAGE_CALL_6;
+const SOURCES = ['LinkedIn', 'Cold list', 'Recommandation', 'Salon', 'Pub', 'Site web', 'Autre'];
+const LOST_REASONS = ['Pas interesse', 'Pas le moment', 'Pas decideur', 'Pas pertinent', 'Deja equipe', 'Budget', 'Autre'];
+
 function loadConfig() {
-  STAGES = [{ id: 0, label: 'Nouveau', color: '#c9a96e' }, { id: 1, label: 'Contacte', color: '#8b6cf6' }, { id: 2, label: 'Relance', color: '#f59e0b' }, { id: 3, label: 'RDV Fixe', color: '#f97316' }, { id: 4, label: 'Proposition', color: '#22d3ee' }, { id: 5, label: 'Signe', color: '#4ade80' }, { id: 6, label: 'Perdu', color: '#ef4444' }];
-  SEQ = [{ day: 0, type: 'email', icon: 'M', label: 'Email #1 - Accroche', desc: 'Audit social offert' }, { day: 5, type: 'email', icon: 'M', label: 'Email #2 - Valeur', desc: 'Cas concret confrere' }, { day: 10, type: 'linkedin', icon: 'L', label: 'LinkedIn', desc: 'Connexion + message' }, { day: 14, type: 'email', icon: 'M', label: 'Email #3 - Action', desc: 'Lien Calendly' }, { day: 19, type: 'sms', icon: 'S', label: 'SMS', desc: 'Message court' }, { day: 25, type: 'email', icon: 'M', label: 'Email #4 - Break-up', desc: 'Fermeture bienveillante' }];
-  CATS = ['Medecin liberal', 'Chirurgien', 'Dentiste', 'Chef d\'entreprise', 'Profession liberale', 'Salarie cadre', 'Dirigeant TNS', 'Investisseur prive', 'Retraite', 'Autre'];
+  STAGES = [
+    { id: 0, label: 'Nouveau', color: '#94a3b8' },
+    { id: 1, label: 'Appel 1', color: '#3b82f6' },
+    { id: 2, label: 'Appel 2', color: '#06b6d4' },
+    { id: 3, label: 'Appel 3', color: '#10b981' },
+    { id: 4, label: 'Appel 4', color: '#eab308' },
+    { id: 5, label: 'Appel 5', color: '#f97316' },
+    { id: 6, label: 'Appel 6', color: '#dc2626' },
+    { id: 7, label: 'Call book\u00e9', color: '#c9a96e' },
+    { id: 8, label: 'Sign\u00e9', color: '#4ade80' },
+    { id: 9, label: 'Perdu', color: '#ef4444' },
+    { id: 10, label: 'Inactif', color: '#64748b' }
+  ];
+  SEQ = [
+    { day: 0, type: 'call', icon: 'C', label: 'Appel 1', desc: 'Premier contact' },
+    { day: 1, type: 'call', icon: 'C', label: 'Appel 2', desc: 'Relance J+1' },
+    { day: 2, type: 'call', icon: 'C', label: 'Appel 3', desc: 'Relance J+2' },
+    { day: 3, type: 'call', icon: 'C', label: 'Appel 4', desc: 'Relance J+3' },
+    { day: 4, type: 'call', icon: 'C', label: 'Appel 5', desc: 'Relance J+4' },
+    { day: 5, type: 'call', icon: 'C', label: 'Appel 6', desc: 'Derni\u00e8re tentative' }
+  ];
+  CATS = SOURCES; // backward-compat: CATS is now sources
   const c = localStorage.getItem(userKey('cfg'));
-  if (c) { const d = JSON.parse(c); if (d.stages) STAGES = d.stages; if (d.seq) SEQ = d.seq; if (d.cats) CATS = d.cats; }
+  // Force migration to pipeline v2 if old structure detected
+  const migrated = localStorage.getItem(userKey('pipelinev2'));
+  if (c && migrated) {
+    const d = JSON.parse(c);
+    if (d.stages) STAGES = d.stages;
+    if (d.seq) SEQ = d.seq;
+    if (d.cats) CATS = d.cats;
+  } else {
+    // Migration: save new defaults and remap existing prospects
+    localStorage.setItem(userKey('pipelinev2'), '1');
+    saveConfig();
+    setTimeout(migrateProspectsToV2, 200);
+  }
+}
+
+function migrateProspectsToV2() {
+  if (!prospects || !prospects.length) return;
+  let changed = false;
+  prospects.forEach(p => {
+    // Old stages: 0=Nouveau, 1=Contacte, 2=Relance, 3=RDV, 4=Proposition, 5=Signe, 6=Perdu
+    // New:       0=Nouveau, 1-6=Appel 1-6, 7=Call book\u00e9, 8=Sign\u00e9, 9=Perdu, 10=Inactif
+    if (p._migrated) return;
+    const old = p.stage;
+    if (old === 5) p.stage = STAGE_SIGNED;
+    else if (old === 6) p.stage = STAGE_LOST;
+    else if (old === 4) p.stage = STAGE_BOOKED;
+    else if (old === 3) p.stage = STAGE_BOOKED;
+    else if (old === 2) p.stage = 2;
+    else if (old === 1) p.stage = STAGE_CALL_1;
+    // 0 stays 0
+    if (!p.callHistory) p.callHistory = [];
+    p._migrated = true;
+    changed = true;
+  });
+  if (changed) save();
 }
 
 async function startApp(user) {
@@ -1154,7 +1216,7 @@ async function startApp(user) {
   await Sync.loadProspects();
   initImport();
   document.getElementById('searchInput').addEventListener('input', () => renderAll());
-  nav('dashboard');
+  nav('tasks');
   // Keyboard shortcuts
   document.addEventListener('keydown', handleShortcuts);
   // Notifications
@@ -1189,8 +1251,9 @@ function nowISO() { return new Date().toISOString(); }
 function addDays(ds, n) { if (!ds) return null; const d = new Date(ds); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; }
 function fmtDate(d) { if (!d) return '\u2014'; return new Date(d).toLocaleDateString('fr-FR'); }
 function fmtDateTime(d) { if (!d) return '\u2014'; return new Date(d).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+function formatDuration(sec) { if (!sec) return '\u2014'; sec = parseInt(sec) || 0; const m = Math.floor(sec / 60); const s = sec % 60; return m ? `${m}m ${s}s` : `${s}s`; }
 function daysFromNow(ds) { if (!ds) return null; return Math.floor((new Date(ds) - Date.now()) / 86400000); }
-function getSeq(p) { if (!p.contactDate) return { step: -1, dueDate: null, days: null }; const done = p.seqDone || []; for (let i = 0; i < SEQ.length; i++) { if (!done.includes(i)) { const due = addDays(p.contactDate, SEQ[i].day); return { step: i, dueDate: due, days: daysFromNow(due) }; } } return { step: -1, dueDate: null, days: null }; }
+function getSeq(p) { const base = p.contactDate || p.createdAt || today(); const done = p.seqDone || []; for (let i = 0; i < SEQ.length; i++) { if (!done.includes(i)) { const due = addDays(base, SEQ[i].day); return { step: i, dueDate: due, days: daysFromNow(due) }; } } return { step: -1, dueDate: null, days: null }; }
 function avatarColor(str) { const colors = ['#c9a96e', '#8b6cf6', '#22d3ee', '#f97316', '#4ade80', '#f59e0b', '#ef4444', '#ec4899']; let h = 0; for (const c of (str || '?')) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff; return colors[Math.abs(h) % colors.length]; }
 function initials(p) { return ((p.firstName || '?')[0] + (p.lastName || '?')[0]).toUpperCase(); }
 function match(p, q) { if (!q) return true; q = q.toLowerCase(); return ['firstName', 'lastName', 'email', 'phone', 'city', 'category', 'address', 'linkedin', 'source'].some(f => (p[f] || '').toLowerCase().includes(q)) || (p.tags || []).some(t => t.toLowerCase().includes(q)) || (p.notes || []).some(n => n.text.toLowerCase().includes(q)); }
@@ -1253,12 +1316,12 @@ function getMonthProgress() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
   const newP = prospects.filter(p => (p.createdAt || '') >= monthStart).length;
   const signed = prospects.filter(p => {
-    if (p.stage !== 5) return false;
+    if (p.stage !== STAGE_SIGNED) return false;
     const a = (p.activity || []).filter(x => x.type === 'stage' && x.detail.includes('Signe'));
     if (a.length) return a[a.length - 1].date >= monthStart;
     return (p.lastInteraction || '') >= monthStart;
   }).length;
-  const revenue = prospects.filter(p => p.stage === 5).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+  const revenue = prospects.filter(p => p.stage === STAGE_SIGNED).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
   return { newP, signed, revenue };
 }
 
@@ -1311,7 +1374,7 @@ function requestNotifPermission() {
 function checkLateNotifs() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const late = prospects.filter(p => {
-    if (p.stage >= 5) return false;
+    if (isClosed(p.stage)) return false;
     const s = getSeq(p);
     return s.step >= 0 && s.days !== null && s.days < 0;
   });
@@ -1352,13 +1415,23 @@ function renderCalendar() {
       events[p.rappelDate] = events[p.rappelDate] || [];
       events[p.rappelDate].push({ type: 'rappel', prospect: p, label: 'Rappel' });
     }
-    if (p.contactDate && p.stage < 5 && p.stage !== 6) {
+    if (p.bookedAt) {
+      const bd = p.bookedAt.slice(0, 10);
+      events[bd] = events[bd] || [];
+      events[bd].push({ type: 'booked', prospect: p, label: 'RDV booke ' + (p.bookedAt.slice(11, 16) || '') });
+    }
+    if (p.contactDate && isActive(p.stage)) {
       const s = getSeq(p);
       if (s.step >= 0 && s.dueDate) {
         events[s.dueDate] = events[s.dueDate] || [];
         events[s.dueDate].push({ type: s.days < 0 ? 'late' : 'seq', prospect: p, label: SEQ[s.step]?.label || 'Tache', step: s.step });
       }
     }
+  });
+  // Custom events
+  getCustomEvents().forEach(ev => {
+    events[ev.date] = events[ev.date] || [];
+    events[ev.date].push({ type: 'custom', id: ev.id, label: ev.label + (ev.time ? ' @ ' + ev.time : '') });
   });
 
   let html = `
@@ -1385,7 +1458,7 @@ function renderCalendar() {
     const isToday = dateStr === todayStr;
     const isSelected = dateStr === calSelected;
     const evHtml = dayEvents.slice(0, 3).map(e => `<div class="cal-event ${e.type}">${(e.prospect.firstName || '') + ' ' + (e.prospect.lastName || '')}</div>`).join('') + (dayEvents.length > 3 ? `<div class="cal-event">+${dayEvents.length - 3}</div>` : '');
-    html += `<div class="cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="calSelectDay('${dateStr}')"><div class="cal-day-num">${d}</div><div class="cal-day-events">${evHtml}</div></div>`;
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" onclick="calSelectDay('${dateStr}')" ondblclick="calAddEvent('${dateStr}')" title="Double-clic pour ajouter un evenement"><div class="cal-day-num">${d}</div><div class="cal-day-events">${evHtml}</div></div>`;
   }
   // Next month padding
   const totalCells = startWeekday + daysInMonth;
@@ -1397,13 +1470,16 @@ function renderCalendar() {
 
   // Day detail
   if (calSelected && events[calSelected]) {
-    html += `<div class="cal-day-detail"><h3>${fmtDate(calSelected)} &middot; ${events[calSelected].length} evenement${events[calSelected].length > 1 ? 's' : ''}</h3><div class="cal-detail-list">${events[calSelected].map(e => {
+    html += `<div class="cal-day-detail"><h3>${fmtDate(calSelected)} &middot; ${events[calSelected].length} evenement${events[calSelected].length > 1 ? 's' : ''} <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="calAddEvent('${calSelected}')">+ Ajouter</button></h3><div class="cal-detail-list">${events[calSelected].map(e => {
+      if (e.type === 'custom') {
+        return `<div class="cal-detail-item" style="background:var(--gold-bg);border:1px solid var(--gold-b)"><div style="width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">\u2605</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--gold)">${e.label}</div><div style="font-size:10px;color:var(--sub)">Evenement personnel</div></div><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();calDeleteEvent(${e.id})" style="color:var(--red)">\u00d7</button></div>`;
+      }
       const p = e.prospect; const col = avatarColor(p.lastName);
-      const icon = e.type === 'rappel' ? '\u23F0' : e.type === 'late' ? '\u26A0' : '\u2713';
+      const icon = e.type === 'rappel' ? '\u23F0' : e.type === 'late' ? '\u26A0' : e.type === 'booked' ? '\u{1F4C5}' : '\u2713';
       return `<div class="cal-detail-item" onclick="openProspect(${p.id})"><div class="task-avatar" style="background:${col};width:30px;height:30px;font-size:11px">${initials(p)}</div><div style="flex:1"><div style="font-size:12px;font-weight:600">${p.firstName || ''} ${p.lastName || ''}</div><div style="font-size:10px;color:var(--sub)">${icon} ${e.label}</div></div></div>`;
     }).join('')}</div></div>`;
   } else if (calSelected) {
-    html += `<div class="cal-day-detail"><h3>${fmtDate(calSelected)}</h3><p style="color:var(--sub);font-size:12px">Aucun evenement ce jour.</p></div>`;
+    html += `<div class="cal-day-detail"><h3>${fmtDate(calSelected)} <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="calAddEvent('${calSelected}')">+ Ajouter</button></h3><p style="color:var(--sub);font-size:12px">Aucun evenement ce jour. Double-cliquez un jour pour ajouter.</p></div>`;
   }
 
   el.innerHTML = html;
@@ -1412,6 +1488,25 @@ function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
 function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
 function calToday() { calMonth = new Date().getMonth(); calYear = new Date().getFullYear(); calSelected = today(); renderCalendar(); }
 function calSelectDay(d) { calSelected = d; renderCalendar(); }
+function getCustomEvents() { try { return JSON.parse(localStorage.getItem(userKey('customEvents')) || '[]'); } catch { return []; } }
+function saveCustomEvents(evts) { localStorage.setItem(userKey('customEvents'), JSON.stringify(evts)); if (window.db && currentUser) db.collection('users').doc(currentUser.uid).set({ customEvents: JSON.stringify(evts) }, { merge: true }).catch(() => {}); }
+function calAddEvent(dateStr) {
+  const label = prompt('Titre de l\'evenement :', '');
+  if (!label || !label.trim()) return;
+  const time = prompt('Heure (HH:MM, laisse vide si toute la journee) :', '10:00') || '';
+  const evts = getCustomEvents();
+  evts.push({ id: Date.now(), date: dateStr, time: time.trim(), label: label.trim() });
+  saveCustomEvents(evts);
+  renderCalendar();
+  toast('Evenement ajoute', 'ok');
+}
+function calDeleteEvent(id) {
+  if (!confirm('Supprimer cet evenement ?')) return;
+  const evts = getCustomEvents().filter(e => e.id !== id);
+  saveCustomEvents(evts);
+  renderCalendar();
+  toast('Evenement supprime', 'ok');
+}
 
 // =============================================
 // DASHBOARD
@@ -1419,35 +1514,39 @@ function calSelectDay(d) { calSelected = d; renderCalendar(); }
 function renderDashboard() {
   const el = document.getElementById('dashBody');
   const tot = prospects.length;
-  const sig = prospects.filter(p => p.stage === 5).length;
-  const late = prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }).length;
-  const totalAmount = prospects.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
-  const hot = prospects.filter(p => p.priority === 'hot' && p.stage < 5 && p.stage !== 6).length;
+  const active = prospects.filter(p => isActive(p.stage)).length;
+  const todayStr = today();
+  const monthStart = new Date(); monthStart.setDate(1); const monthStartStr = monthStart.toISOString().split('T')[0];
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); const weekStartStr = weekStart.toISOString().split('T')[0];
 
-  // Recent activity across all prospects
-  const allActivity = [];
+  let callsToday = 0, booksThisWeek = 0, signedThisMonth = 0;
   prospects.forEach(p => {
-    (p.activity || []).forEach(a => {
-      allActivity.push({ ...a, prospect: p });
+    (p.callHistory || []).forEach(c => {
+      const d = (c.date || '').slice(0, 10);
+      if (d === todayStr) callsToday++;
+      if (d >= weekStartStr && c.outcome === 'Booke') booksThisWeek++;
     });
+    if (p.stage === STAGE_SIGNED) {
+      const a = (p.activity || []).filter(x => x.type === 'stage' && /Sign/i.test(x.detail));
+      if (a.length && (a[a.length - 1].date || '').slice(0, 10) >= monthStartStr) signedThisMonth++;
+    }
   });
+
+  const allActivity = [];
+  prospects.forEach(p => { (p.activity || []).forEach(a => { allActivity.push({ ...a, prospect: p }); }); });
   allActivity.sort((a, b) => new Date(b.date) - new Date(a.date));
   const recent = allActivity.slice(0, 8);
 
-  // Funnel
-  const funnel = STAGES.filter(s => s.id !== 6).map(s => ({
+  const funnel = STAGES.filter(s => s.id !== STAGE_LOST && s.id !== STAGE_INACTIVE).map(s => ({
     label: s.label, n: prospects.filter(p => p.stage === s.id).length, color: s.color
   }));
   const maxFunnel = Math.max(...funnel.map(f => f.n), 1);
 
-  // Upcoming tasks
   const tasks = [];
   prospects.forEach(p => {
-    if (p.stage >= 5) return;
+    if (isClosed(p.stage)) return;
     const s = getSeq(p);
-    if (s.step >= 0 && s.days !== null && s.days <= 3) {
-      tasks.push({ prospect: p, seq: SEQ[s.step], days: s.days });
-    }
+    if (s.step >= 0 && s.days !== null && s.days <= 3) tasks.push({ prospect: p, seq: SEQ[s.step], days: s.days });
   });
   tasks.sort((a, b) => a.days - b.days);
 
@@ -1457,7 +1556,7 @@ function renderDashboard() {
     <div class="dash-grid">
       <div class="dash-welcome">
         <h2>${greeting}, ${currentUser?.name || 'Utilisateur'}</h2>
-        <div class="sub">${tot} prospects &middot; ${sig} signes &middot; ${late} en retard &middot; ${hot} chauds &middot; ${totalAmount ? totalAmount.toLocaleString('fr-FR') + ' EUR pipeline' : 'Aucun montant'}</div>
+        <div class="sub">${active} prospects actifs &middot; ${callsToday} appels aujourd'hui &middot; ${booksThisWeek} bookes cette semaine &middot; ${signedThisMonth} signes ce mois</div>
         <div style="display:flex;gap:8px;margin-top:16px">
           <button class="btn btn-primary" onclick="openProspect(null)">+ Nouveau prospect</button>
           ${tasks.length ? `<button class="btn btn-ghost" onclick="nav('tasks');setTimeout(startFocus,200)">Mode Focus (${tasks.length})</button>` : ''}
@@ -1465,7 +1564,7 @@ function renderDashboard() {
       </div>
 
       <div class="dash-card">
-        <h3>Entonnoir de conversion</h3>
+        <h3>Pipeline</h3>
         ${funnel.map(f => `<div class="dash-funnel-row"><div class="dash-funnel-lbl">${f.label}</div><div class="dash-funnel-bar" style="width:${Math.max(f.n / maxFunnel * 100, 12)}%;background:${f.color}">${f.n}</div></div>`).join('')}
       </div>
 
@@ -1485,39 +1584,10 @@ function renderDashboard() {
         <h3>Activite recente</h3>
         <div class="dash-recent">
           ${recent.length ? recent.map(a => {
-            const icons = { stage: '\u2192', note: '\u270E', seq: '\u2713', create: '+', import: '\u2193' };
+            const icons = { stage: '\u2192', note: '\u270E', call: '\u260E', seq: '\u2713', create: '+', import: '\u2193' };
             return `<div class="dash-recent-item" style="cursor:pointer" onclick="openProspect(${a.prospect.id})"><div class="dash-recent-icon">${icons[a.type] || '\u2022'}</div><div class="dash-recent-info"><div class="lbl">${(a.prospect.firstName || '') + ' ' + (a.prospect.lastName || '')}</div><div class="desc">${a.detail} &middot; ${fmtDateTime(a.date)}</div></div></div>`;
           }).join('') : '<div style="color:var(--sub);font-size:12px;text-align:center;padding:20px">Aucune activite</div>'}
         </div>
-      </div>
-
-      <div class="dash-card">
-        <h3>Objectifs du mois</h3>
-        ${(() => {
-          const obj = getObjectives();
-          const prog = getMonthProgress();
-          const items = [
-            { lbl: 'Nouveaux prospects', cur: prog.newP, tgt: obj.newProspects },
-            { lbl: 'Signes', cur: prog.signed, tgt: obj.signed },
-            { lbl: 'CA realise (EUR)', cur: prog.revenue, tgt: obj.revenue, fmt: v => v.toLocaleString('fr-FR') }
-          ];
-          return items.map(it => {
-            const pct = it.tgt > 0 ? Math.min((it.cur / it.tgt) * 100, 100) : 0;
-            const fmt = it.fmt || (v => v);
-            return `<div class="obj-row"><span class="obj-lbl">${it.lbl}</span><span class="obj-val">${fmt(it.cur)} / ${fmt(it.tgt)}</span></div><div class="obj-bar"><div class="obj-fill ${pct >= 100 ? 'complete' : ''}" style="width:${pct}%"></div></div>`;
-          }).join('');
-        })()}
-        <div style="font-size:10px;color:var(--hint);margin-top:6px">Configurable dans Parametres</div>
-      </div>
-
-      <div class="dash-card">
-        <h3>Prospects chauds</h3>
-        ${prospects.filter(p => p.priority === 'hot' && p.stage < 5 && p.stage !== 6).length ?
-          prospects.filter(p => p.priority === 'hot' && p.stage < 5 && p.stage !== 6).slice(0, 5).map(p => {
-            const col = avatarColor(p.lastName); const st = STAGES[p.stage] || STAGES[0];
-            return `<div class="dash-recent-item" style="cursor:pointer" onclick="openProspect(${p.id})"><div class="priority-dot priority-hot" style="margin-right:4px"></div><div class="dash-recent-icon" style="background:${col};color:#fff;font-size:10px;font-weight:700">${initials(p)}</div><div class="dash-recent-info"><div class="lbl">${p.firstName || ''} ${p.lastName || ''}</div><div class="desc">${st.label}${p.amount ? ' &middot; ' + parseFloat(p.amount).toLocaleString('fr-FR') + ' EUR' : ''}</div></div></div>`;
-          }).join('') : '<div style="color:var(--sub);font-size:12px;text-align:center;padding:20px">Aucun prospect chaud</div>'
-        }
       </div>
     </div>`;
 }
@@ -1525,22 +1595,37 @@ function renderDashboard() {
 // =============================================
 // KPI
 // =============================================
+let kpiExpanded = null;
 function renderKPI() {
-  const tot = prospects.length, sig = prospects.filter(p => p.stage === 5).length;
-  const rdv = prospects.filter(p => p.stage >= 3 && p.stage !== 6).length;
+  const tot = prospects.length;
+  const sig = prospects.filter(p => p.stage === STAGE_SIGNED).length;
+  const active = prospects.filter(p => isActive(p.stage)).length;
+  const booked = prospects.filter(p => p.stage === STAGE_BOOKED).length;
   const late = prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }).length;
   const conv = tot ? Math.round(sig / tot * 100) : 0;
-  const totalAmount = prospects.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
-  const amtStr = totalAmount ? totalAmount.toLocaleString('fr-FR') + 'E' : '0';
-  document.getElementById('kpiStrip').innerHTML = [
-    { lbl: 'Prospects', val: tot, delta: 'Total', cls: 'kd-gold' },
-    { lbl: 'En cours', val: prospects.filter(p => p.stage < 5 && p.stage !== 6).length, delta: 'Actifs', cls: 'kd-gold' },
-    { lbl: 'RDV & +', val: rdv, delta: 'Etape 3+', cls: 'kd-orange' },
-    { lbl: 'Signes', val: sig, delta: conv + '%', cls: 'kd-green' },
-    { lbl: 'En retard', val: late, delta: 'A relancer', cls: late > 0 ? 'kd-red' : 'kd-gold' },
-    { lbl: 'Montant', val: amtStr, delta: 'Pipeline', cls: 'kd-gold' },
-  ].map(k => `<div class="kpi-item"><div class="kpi-lbl">${k.lbl}</div><div class="kpi-row"><div class="kpi-val">${k.val}</div><div class="kpi-delta ${k.cls}">${k.delta}</div></div></div>`).join('');
+  const todayStr = today();
+  const callsTodayList = [];
+  prospects.forEach(p => { (p.callHistory || []).forEach(c => { if ((c.date || '').slice(0, 10) === todayStr) callsTodayList.push({ p, c }); }); });
+  const data = [
+    { key: 'tot', lbl: 'Prospects', val: tot, delta: 'Total', cls: 'kd-gold', list: prospects },
+    { key: 'act', lbl: 'En cours', val: active, delta: 'Actifs', cls: 'kd-gold', list: prospects.filter(p => isActive(p.stage)) },
+    { key: 'tod', lbl: 'Appels auj.', val: callsTodayList.length, delta: 'Aujourd\'hui', cls: 'kd-orange', list: callsTodayList.map(x => x.p), extra: callsTodayList },
+    { key: 'bok', lbl: 'Bookes', val: booked, delta: 'RDV pris', cls: 'kd-orange', list: prospects.filter(p => p.stage === STAGE_BOOKED) },
+    { key: 'sig', lbl: 'Signes', val: sig, delta: conv + '%', cls: 'kd-green', list: prospects.filter(p => p.stage === STAGE_SIGNED) },
+    { key: 'lat', lbl: 'En retard', val: late, delta: 'A relancer', cls: late > 0 ? 'kd-red' : 'kd-gold', list: prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }) },
+  ];
+  const strip = document.getElementById('kpiStrip');
+  strip.innerHTML = data.map(k => `<div class="kpi-item${kpiExpanded === k.key ? ' active' : ''}" style="cursor:pointer;${kpiExpanded === k.key ? 'border:1px solid var(--gold);' : ''}" onclick="toggleKpi('${k.key}')"><div class="kpi-lbl">${k.lbl} ${kpiExpanded === k.key ? '\u25B2' : '\u25BC'}</div><div class="kpi-row"><div class="kpi-val">${k.val}</div><div class="kpi-delta ${k.cls}">${k.delta}</div></div></div>`).join('');
+  // Expanded panel below strip
+  let panel = document.getElementById('kpiPanel');
+  if (!panel) { panel = document.createElement('div'); panel.id = 'kpiPanel'; panel.style.cssText = 'margin:0 22px 10px;background:var(--s1);border:1px solid var(--gold-b);border-radius:var(--r2);max-height:300px;overflow-y:auto;'; strip.parentNode.insertBefore(panel, strip.nextSibling); }
+  if (!kpiExpanded) { panel.innerHTML = ''; panel.style.display = 'none'; return; }
+  const sel = data.find(d => d.key === kpiExpanded);
+  if (!sel || !sel.list.length) { panel.innerHTML = `<div style="padding:14px 16px;font-size:12px;color:var(--hint)">Aucun prospect.</div>`; panel.style.display = 'block'; return; }
+  panel.style.display = 'block';
+  panel.innerHTML = `<div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold)">${sel.lbl}</div><div style="flex:1"></div><div style="font-size:11px;color:var(--sub)">${sel.list.length} prospect${sel.list.length > 1 ? 's' : ''}</div></div><div>${sel.list.slice(0, 100).map(p => { const stCol = STAGES[p.stage]?.color || '#64748b'; return `<div onclick="openProspect(${p.id})" style="padding:8px 14px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:10px;transition:var(--t)" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background=''"><div style="width:8px;height:8px;border-radius:50%;background:${stCol};flex-shrink:0"></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${p.firstName || ''} ${p.lastName || ''}</div><div style="font-size:10px;color:var(--sub)">${[p.source, p.city, p.phone].filter(Boolean).join(' \u00b7 ')}</div></div><div style="font-size:10px;color:${stCol};font-weight:600">${STAGES[p.stage]?.label || ''}</div></div>`; }).join('')}</div>`;
 }
+function toggleKpi(k) { kpiExpanded = (kpiExpanded === k) ? null : k; renderKPI(); }
 
 // =============================================
 // KANBAN + DRAG & DROP
@@ -1549,13 +1634,9 @@ let dragId = null;
 
 function renderKanban() {
   const q = document.getElementById('searchInput').value.toLowerCase();
-  const kbSel = document.getElementById('kbCat'); const curVal = kbSel.value;
-  kbSel.innerHTML = `<option value="">Tous les profils</option>` + CATS.map(c => `<option ${c === curVal ? 'selected' : ''}>${c}</option>`).join('');
-  const cat = kbSel.value;
-  const prioF = document.getElementById('kbPriority').value;
   let visible = 0;
   document.getElementById('kanbanBody').innerHTML = STAGES.map(st => {
-    const cards = prospects.filter(p => p.stage === st.id && match(p, q) && (!cat || p.category === cat) && (!prioF || p.priority === prioF));
+    const cards = prospects.filter(p => p.stage === st.id && match(p, q));
     visible += cards.length;
     return `<div class="col" data-stage="${st.id}" ondragover="dOver(event)" ondragleave="dLeave(event)" ondrop="dDrop(event,${st.id})"><div class="col-head"><div class="col-dot-label"><div class="col-dot" style="background:${st.color}"></div>${st.label}</div><div class="col-n">${cards.length}</div></div><div class="col-body">${cards.map(p => kCard(p)).join('')}<div style="height:4px"></div></div></div>`;
   }).join('');
@@ -1564,23 +1645,23 @@ function renderKanban() {
 
 function kCard(p) {
   const s = getSeq(p); const col = avatarColor(p.lastName);
+  const callsCount = (p.callHistory || []).length;
   let chip = '';
-  if (p.stage === 5) chip = `<span class="seq-chip sc-ok">\u2713 Signe</span>`;
-  else if (p.stage === 6) chip = `<span class="seq-chip sc-idle">Perdu</span>`;
-  else if (!p.contactDate) chip = `<span class="seq-chip sc-idle">Non demarre</span>`;
+  if (p.stage === STAGE_SIGNED) chip = `<span class="seq-chip sc-ok">\u2713 Sign\u00e9</span>`;
+  else if (p.stage === STAGE_LOST) chip = `<span class="seq-chip sc-idle">Perdu</span>`;
+  else if (p.stage === STAGE_INACTIVE) chip = `<span class="seq-chip sc-idle">Inactif</span>`;
+  else if (p.stage === STAGE_BOOKED) chip = `<span class="seq-chip sc-ok">\u2713 Book\u00e9</span>`;
+  else if (!p.contactDate) chip = `<span class="seq-chip sc-pending">A appeler</span>`;
   else if (s.step === -1) chip = `<span class="seq-chip sc-ok">\u2713 Fini</span>`;
   else if (s.days < 0) chip = `<span class="seq-chip sc-late">Retard ${Math.abs(s.days)}j</span>`;
-  else if (s.days <= 2) chip = `<span class="seq-chip sc-due">${s.days === 0 ? "Aujourd'hui" : "Dans " + s.days + "j"}</span>`;
-  else chip = `<span class="seq-chip sc-pending">${SEQ[s.step]?.icon || '?'} J+${s.days}</span>`;
-  const amt = p.amount ? `<div style="font-size:10px;color:var(--gold);font-weight:600;margin-bottom:4px">${parseFloat(p.amount).toLocaleString('fr-FR')} EUR</div>` : '';
-  const prioDot = p.priority ? `<div class="priority-dot priority-${p.priority}" style="position:absolute;top:8px;right:8px" title="${p.priority}"></div>` : '';
-  const tagsHtml = (p.tags || []).length ? `<div class="kcard-tags">${p.tags.slice(0, 3).map(t => `<span class="kcard-tag">${t}</span>`).join('')}</div>` : '';
-  return `<div class="kcard" draggable="true" ondragstart="dStart(event,${p.id})" ondragend="dEnd(event)" onclick="openProspect(${p.id})">
-    ${prioDot}
-    <div class="kcard-top"><div class="kcard-avatar" style="background:${col}">${initials(p)}</div><div style="min-width:0"><div class="kcard-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="kcard-cat">${p.category || '\u2014'}</div></div></div>
-    ${p.city ? `<div class="kcard-city">${p.city}</div>` : ''}${tagsHtml}${amt}
-    <div class="kcard-footer">${chip}${scoreBar(p)}</div>
-    <div style="font-size:9px;color:var(--hint);margin-top:4px;text-align:right">${fmtDate(p.contactDate)}</div>
+  else if (s.days === 0) chip = `<span class="seq-chip sc-due">Aujourd'hui</span>`;
+  else chip = `<span class="seq-chip sc-pending">J+${s.days}</span>`;
+  const stCol = STAGES[p.stage]?.color || '#64748b';
+  return `<div class="kcard" draggable="true" ondragstart="dStart(event,${p.id})" ondragend="dEnd(event)" onclick="openProspect(${p.id})" style="border-left:3px solid ${stCol}">
+    <div class="kcard-top"><div class="kcard-avatar" style="background:${col}">${initials(p)}</div><div style="min-width:0"><div class="kcard-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="kcard-cat">${p.source || p.category || '\u2014'}</div></div></div>
+    ${p.phone ? `<div class="kcard-city">\u260E <a href="tel:${p.phone}" onclick="event.stopPropagation()" style="color:var(--gold);text-decoration:none">${p.phone}</a></div>` : ''}
+    ${callsCount ? `<div style="font-size:10px;color:var(--purple);margin-bottom:6px">${callsCount} appel${callsCount > 1 ? 's' : ''} enregistr\u00e9${callsCount > 1 ? 's' : ''}</div>` : ''}
+    <div class="kcard-footer">${chip}<div class="kcard-date">${fmtDate(p.contactDate)}</div></div>
   </div>`;
 }
 
@@ -1596,7 +1677,7 @@ function dDrop(e, stageId) {
     const oldStage = STAGES[p.stage]?.label || '?';
     p.stage = stageId;
     logActivity(p, 'stage', `${oldStage} \u2192 ${STAGES[stageId]?.label || '?'}`);
-    if (!p.contactDate && stageId >= 1) p.contactDate = today();
+    if (!p.contactDate && stageId >= STAGE_CALL_1) p.contactDate = today();
     save(); renderAll(); toast('Etape mise a jour', 'ok');
   }
   dragId = null;
@@ -1610,14 +1691,13 @@ function renderList() {
   const stSel = document.getElementById('lstStage'); const stCur = stSel.value;
   stSel.innerHTML = `<option value="">Toutes etapes</option>` + STAGES.map(s => `<option value="${s.id}" ${stCur == s.id ? 'selected' : ''}>${s.label}</option>`).join('');
   const catSel = document.getElementById('lstCat'); const catCur = catSel.value;
-  catSel.innerHTML = `<option value="">Tous profils</option>` + CATS.map(c => `<option ${c === catCur ? 'selected' : ''}>${c}</option>`).join('');
-  const stF = stSel.value, catF = catSel.value;
-  const prioF = document.getElementById('lstPriority').value;
-  let data = prospects.filter(p => match(p, q) && (stF === '' || p.stage == stF) && (catF === '' || p.category === catF) && (!prioF || p.priority === prioF));
+  catSel.innerHTML = `<option value="">Toutes sources</option>` + SOURCES.map(c => `<option ${c === catCur ? 'selected' : ''}>${c}</option>`).join('');
+  const stF = stSel.value, srcF = catSel.value;
+  let data = prospects.filter(p => match(p, q) && (stF === '' || p.stage == stF) && (srcF === '' || p.source === srcF));
   data.sort((a, b) => { let va = a[sortField] || '', vb = b[sortField] || ''; if (typeof va === 'number') return sortAsc ? va - vb : vb - va; return sortAsc ? String(va).localeCompare(String(vb), 'fr') : String(vb).localeCompare(String(va), 'fr'); });
   document.getElementById('lstCount').textContent = `${data.length} resultat${data.length > 1 ? 's' : ''}`;
-  const cols = [['lastName', 'Nom'], ['category', 'Profil'], ['priority', 'Prio.'], ['city', 'Ville'], ['stage', 'Etape'], ['amount', 'Montant'], ['email', 'Email'], ['phone', 'Tel'], ['contactDate', 'Contact']];
-  document.getElementById('listHead').innerHTML = `<th style="width:30px"><input type="checkbox" class="row-check" onchange="toggleAll(this.checked)"></th>` + cols.map(([f, l]) => `<th onclick="sortBy('${f}')">${l}${sortField === f ? sortAsc ? ' \u2191' : ' \u2193' : ''}</th>`).join('') + '<th>Score</th><th>Seq.</th><th></th>';
+  const cols = [['lastName', 'Nom'], ['source', 'Source'], ['city', 'Ville'], ['stage', 'Etape'], ['email', 'Email'], ['phone', 'Tel'], ['contactDate', 'Contact']];
+  document.getElementById('listHead').innerHTML = `<th style="width:30px"><input type="checkbox" class="row-check" onchange="toggleAll(this.checked)"></th>` + cols.map(([f, l]) => `<th onclick="sortBy('${f}')">${l}${sortField === f ? sortAsc ? ' \u2191' : ' \u2193' : ''}</th>`).join('') + '<th>Appels</th><th>Seq.</th><th></th>';
   document.getElementById('listBody').innerHTML = data.map(p => {
     const st = STAGES[p.stage] || STAGES[0]; const s = getSeq(p); const col = avatarColor(p.lastName);
     const sel = selectedIds.has(p.id);
@@ -1627,19 +1707,17 @@ function renderList() {
       else if (s.days < 0) seq = `<span style="color:var(--red);font-size:11px;font-weight:600">${Math.abs(s.days)}j</span>`;
       else seq = `<span style="color:var(--sub);font-size:11px">${SEQ[s.step]?.icon || ''} J+${s.days}</span>`;
     }
-    const prioDot = p.priority ? `<span class="priority-dot priority-${p.priority}" style="display:inline-block;vertical-align:middle"></span>` : '<span style="color:var(--hint)">\u2014</span>';
+    const calls = (p.callHistory || []).length;
     return `<tr class="${sel ? 'selected' : ''}">
       <td><input type="checkbox" class="row-check" ${sel ? 'checked' : ''} onchange="toggleSelect(${p.id},this.checked)"></td>
       <td><div class="name-cell"><div class="avatar-sm" style="background:${col}">${initials(p)}</div><span style="font-weight:600">${p.firstName || ''} ${p.lastName || ''}</span></div></td>
-      <td>${p.category ? `<span class="cat-pill">${p.category}</span>` : '<span style="color:var(--hint)">\u2014</span>'}</td>
-      <td style="text-align:center">${prioDot}</td>
+      <td>${p.source ? `<span class="cat-pill">${p.source}</span>` : '<span style="color:var(--hint)">\u2014</span>'}</td>
       <td style="color:var(--sub)">${p.city || '\u2014'}</td>
       <td><span class="stage-pill" style="background:${st.color}12;color:${st.color};border:1px solid ${st.color}25"><span style="width:6px;height:6px;border-radius:50%;background:${st.color};display:inline-block"></span>${st.label}</span></td>
-      <td style="color:var(--gold);font-weight:600;font-size:11px">${p.amount ? parseFloat(p.amount).toLocaleString('fr-FR') + ' EUR' : '\u2014'}</td>
       <td style="color:var(--sub)">${p.email || '\u2014'}</td>
-      <td style="color:var(--sub)">${p.phone || '\u2014'}</td>
+      <td style="color:var(--sub)">${p.phone ? `<a href="tel:${p.phone}" onclick="event.stopPropagation()" style="color:var(--gold);text-decoration:none">${p.phone}</a>` : '\u2014'}</td>
       <td style="color:var(--sub)">${fmtDate(p.contactDate)}</td>
-      <td>${scoreBar(p)}</td>
+      <td style="color:var(--purple);font-weight:600;font-size:11px">${calls || '\u2014'}</td>
       <td>${seq}</td>
       <td><button class="act-btn" onclick="openProspect(${p.id})">&#9998;</button><button class="act-btn" onclick="del(${p.id})">&#10005;</button></td>
     </tr>`;
@@ -1649,7 +1727,7 @@ function renderList() {
 
 function sortBy(f) { if (sortField === f) sortAsc = !sortAsc; else { sortField = f; sortAsc = true; } renderList(); }
 function toggleSelect(id, checked) { if (checked) selectedIds.add(id); else selectedIds.delete(id); renderList(); }
-function toggleAll(checked) { const q = document.getElementById('searchInput').value.toLowerCase(); const stF = document.getElementById('lstStage').value; const catF = document.getElementById('lstCat').value; const prioF = document.getElementById('lstPriority').value; prospects.filter(p => match(p, q) && (stF === '' || p.stage == stF) && (catF === '' || p.category === catF) && (!prioF || p.priority === prioF)).forEach(p => { if (checked) selectedIds.add(p.id); else selectedIds.delete(p.id); }); renderList(); }
+function toggleAll(checked) { const q = document.getElementById('searchInput').value.toLowerCase(); const stF = document.getElementById('lstStage').value; const srcF = document.getElementById('lstCat').value; prospects.filter(p => match(p, q) && (stF === '' || p.stage == stF) && (srcF === '' || p.source === srcF)).forEach(p => { if (checked) selectedIds.add(p.id); else selectedIds.delete(p.id); }); renderList(); }
 function clearSelection() { selectedIds.clear(); renderList(); }
 function updateBulkBar() {
   const bar = document.getElementById('bulkBar');
@@ -1676,62 +1754,77 @@ function bulkDelete() {
 // =============================================
 function openProspect(id) {
   const isNew = id === null;
-  let p = isNew ? { id: null, stage: 0, seqDone: [], notes: [], activity: [], contactDate: null, createdAt: today(), amount: '', source: '', linkedin: '', rappelDate: '', priority: '', tags: [] } : prospects.find(x => x.id === id);
+  let p = isNew ? { id: null, stage: STAGE_NEW, seqDone: [], notes: [], activity: [], callHistory: [], contactDate: null, createdAt: today(), source: '', rappelDate: '' } : prospects.find(x => x.id === id);
   if (!p) return;
-  if (!p.tags) p.tags = [];
-  if (!p.priority) p.priority = '';
+  if (!p.callHistory) p.callHistory = [];
   const col = avatarColor(p.lastName);
   document.getElementById('mAvatar').style.background = col;
   document.getElementById('mAvatar').textContent = isNew ? '+' : initials(p);
   document.getElementById('mTitle').textContent = isNew ? 'Nouveau prospect' : `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Prospect';
-  document.getElementById('mSub').textContent = isNew ? 'Ajouter un contact' : [p.category, p.city].filter(Boolean).join(' \u00b7 ') || '';
+  document.getElementById('mSub').textContent = isNew ? 'Ajouter un contact' : [p.source, p.city].filter(Boolean).join(' \u00b7 ') || '';
 
+  if (isNew) {
+    document.getElementById('mBody').innerHTML = `
+      <div id="dupWarn"></div>
+      <div class="section-label">Nouveau prospect</div>
+      <div class="form-grid">
+        <div class="field"><label>Prenom</label><input id="f_firstName" value=""></div>
+        <div class="field"><label>Nom</label><input id="f_lastName" value=""></div>
+        <div class="field"><label>Telephone</label><input type="tel" id="f_phone" value="" oninput="checkDup(null)"></div>
+        <div class="field"><label>Email</label><input type="email" id="f_email" value="" oninput="checkDup(null)"></div>
+        <div class="field"><label>Ville</label><input id="f_city" value=""></div>
+        <div class="field"><label>Source</label><select id="f_source"><option value="">-</option>${SOURCES.map(s => `<option>${s}</option>`).join('')}</select></div>
+      </div>`;
+    document.getElementById('mFooter').innerHTML = `
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="savePros(null)">Enregistrer</button>`;
+    document.getElementById('modal').classList.remove('hidden');
+    return;
+  }
+
+  // Existing
   const actHtml = (p.activity || []).length ? `<div class="section-label" style="margin-top:16px">Historique d'activite</div><div class="timeline">${(p.activity || []).slice().reverse().slice(0, 15).map(a => {
-    const labels = { stage: 'Etape', note: 'Note', seq: 'Sequence', create: 'Creation', import: 'Import' };
+    const labels = { stage: 'Etape', note: 'Note', seq: 'Sequence', call: 'Appel', create: 'Creation', import: 'Import' };
     return `<div class="tl-item"><div class="tl-dot ${a.type}"></div><div class="tl-content"><div class="tl-label">${labels[a.type] || 'Action'} &middot; ${a.detail}</div><div class="tl-date">${fmtDateTime(a.date)}</div></div></div>`;
   }).join('')}</div>` : '';
 
-  const tpls = !isNew && p.id ? getTemplates() : [];
-  const tplHtml = tpls.length ? `<div class="section-label" style="margin-top:16px">Templates rapides</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tpls.map((t, i) => `<button class="btn btn-ghost btn-sm" onclick="copyTemplate(${p.id},${i})" title="Copier dans le presse-papiers"><span style="color:var(--gold);font-weight:700;margin-right:4px">${t.type === 'sms' ? 'SMS' : t.type === 'linkedin' ? 'LI' : 'Mail'}</span>${t.name}</button>`).join('')}</div><div style="font-size:10px;color:var(--hint);margin-top:6px">Cliquez pour copier le message rempli (variables remplacees).</div>` : '';
+  const tpls = getTemplates();
+  const tplHtml = tpls.length ? `<div class="section-label" style="margin-top:16px">Templates rapides</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tpls.map((t, i) => `<button class="btn btn-ghost btn-sm" onclick="copyTemplate(${p.id},${i})" title="Copier dans le presse-papiers"><span style="color:var(--gold);font-weight:700;margin-right:4px">${t.type === 'sms' ? 'SMS' : t.type === 'linkedin' ? 'LI' : 'Mail'}</span>${t.name}</button>`).join('')}</div>` : '';
 
-  const tagsHtml = (p.tags || []).map(t => `<span class="tag-chip">${t}<button onclick="removeTag(this,'${t.replace(/'/g, "\\'")}')">\u00d7</button></span>`).join('');
+  const outcomeColor = (o) => o === 'NRP' ? 'var(--hint)' : o === 'Recontacter' ? 'var(--orange)' : o === 'Booke' ? 'var(--green)' : o === 'Non qualifie' ? 'var(--red)' : 'var(--sub)';
+  const callsHtml = (p.callHistory || []).length ? `<div class="section-label" style="margin-top:16px">Historique des appels</div><div class="timeline">${(p.callHistory || []).slice().reverse().map(c => `<div class="tl-item"><div class="tl-dot call" style="background:${outcomeColor(c.outcome)}"></div><div class="tl-content"><div class="tl-label">Appel #${c.callNumber} &middot; <span style="color:${outcomeColor(c.outcome)};font-weight:600">${c.outcome}</span>${c.reason ? ' &middot; ' + c.reason : ''} &middot; ${formatDuration(c.duration)}</div>${c.note ? `<div style="font-size:11px;color:var(--text);margin:3px 0">${c.note}</div>` : ''}<div class="tl-date">${fmtDateTime(c.date)}</div></div></div>`).join('')}</div>` : '';
+
+  const canLogCall = isActive(p.stage);
 
   document.getElementById('mBody').innerHTML = `
     <div id="dupWarn"></div>
+    ${canLogCall ? `<button class="btn btn-primary" style="width:100%;margin-bottom:14px" onclick="openCallDialog(${p.id})">&#9742; Enregistrer un appel</button>` : ''}
     <div class="section-label">Informations</div>
     <div class="form-grid">
-      <div class="field"><label>Prenom</label><input id="f_firstName" value="${p.firstName || ''}"></div>
-      <div class="field"><label>Nom</label><input id="f_lastName" value="${p.lastName || ''}"></div>
-      <div class="field"><label>Profil</label><select id="f_category"><option value="">\u2014</option>${CATS.map(c => `<option ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
-      <div class="field"><label>Etape</label><select id="f_stage">${STAGES.map(s => `<option value="${s.id}" ${p.stage === s.id ? 'selected' : ''}>${s.label}</option>`).join('')}</select></div>
-      <div class="field"><label>Priorite</label><select id="f_priority"><option value="">Non definie</option><option value="hot" ${p.priority === 'hot' ? 'selected' : ''}>Chaud</option><option value="warm" ${p.priority === 'warm' ? 'selected' : ''}>Tiede</option><option value="cold" ${p.priority === 'cold' ? 'selected' : ''}>Froid</option></select></div>
-      <div class="field"><label>Email</label><input type="email" id="f_email" value="${p.email || ''}" oninput="checkDup(${p.id || 'null'})"></div>
-      <div class="field"><label>Telephone</label><input type="tel" id="f_phone" value="${p.phone || ''}" oninput="checkDup(${p.id || 'null'})"></div>
-      <div class="field"><label>Ville</label><input id="f_city" value="${p.city || ''}"></div>
+      <div class="field"><label>Prenom</label><input id="f_firstName" value="${(p.firstName || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field"><label>Nom</label><input id="f_lastName" value="${(p.lastName || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field"><label>Telephone</label><div style="display:flex;gap:4px"><input type="tel" id="f_phone" value="${(p.phone || '').replace(/"/g, '&quot;')}" oninput="checkDup(${p.id})" style="flex:1">${p.phone ? `<a href="tel:${p.phone}" class="btn btn-ghost btn-sm" style="color:var(--gold);text-decoration:none">&#9742;</a>` : ''}</div></div>
+      <div class="field"><label>Email</label><input type="email" id="f_email" value="${(p.email || '').replace(/"/g, '&quot;')}" oninput="checkDup(${p.id})"></div>
+      <div class="field"><label>Ville</label><input id="f_city" value="${(p.city || '').replace(/"/g, '&quot;')}"></div>
+      <div class="field"><label>Source</label><select id="f_source"><option value="">-</option>${SOURCES.map(s => `<option ${p.source === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+      <div class="field"><label>Etape</label><select id="f_stage" onchange="document.getElementById('lostRow').style.display=(this.value==${STAGE_LOST}?'block':'none')">${STAGES.map(s => `<option value="${s.id}" ${p.stage === s.id ? 'selected' : ''}>${s.label}</option>`).join('')}</select></div>
       <div class="field"><label>Date 1er contact</label><input type="date" id="f_contactDate" value="${p.contactDate || ''}"></div>
-      <div class="field"><label>Entreprise / Cabinet</label><input id="f_address" value="${p.address || ''}"></div>
-      <div class="field"><label>Montant potentiel (EUR)</label><input type="number" id="f_amount" value="${p.amount || ''}" placeholder="0"></div>
-      <div class="field"><label>LinkedIn</label><input id="f_linkedin" value="${p.linkedin || ''}" placeholder="URL profil"></div>
-      <div class="field"><label>Source d'acquisition</label><select id="f_source"><option value="">-</option>${['Recommandation', 'LinkedIn', 'Site web', 'Salon', 'Appel entrant', 'Email entrant', 'Reseau', 'Publicite', 'Autre'].map(s => `<option ${p.source === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
       <div class="field"><label>Date de rappel</label><input type="date" id="f_rappelDate" value="${p.rappelDate || ''}"></div>
-      <div class="field form-full"><label>Tags</label>
-        <div class="tags-wrap" onclick="this.querySelector('input')?.focus()">
-          ${tagsHtml}
-          <input class="tag-input" id="f_tagInput" placeholder="Ajouter un tag..." onkeydown="handleTagKey(event)">
-        </div>
-      </div>
+      <div class="field form-full" id="lostRow" style="display:${p.stage === STAGE_LOST ? 'block' : 'none'}"><label>Raison de perte</label><select id="f_lostReason"><option value="">-</option>${LOST_REASONS.map(r => `<option ${p.lostReason === r ? 'selected' : ''}>${r}</option>`).join('')}</select></div>
       <div class="field form-full"><label>Nouvelle note</label><textarea id="f_note" placeholder="Contexte, observations, prochaine action..."></textarea></div>
     </div>
-    <div class="section-label" style="margin-top:4px">Sequence</div>
-    ${buildSeqHTML(p, isNew)}
+    ${callsHtml}
+    <div class="section-label" style="margin-top:16px">Sequence d'appels</div>
+    ${buildSeqHTML(p, false)}
     ${tplHtml}
-    ${!isNew ? `<div class="section-label" style="margin-top:16px">Score d'engagement</div><div style="display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:14px"><div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);line-height:1">${calcScore(p)}</div><div style="flex:1"><div style="font-size:11px;font-weight:600;margin-bottom:4px">${calcScore(p) >= 65 ? 'Tres engage' : calcScore(p) >= 35 ? 'Engagement moyen' : 'Faible engagement'}</div><div style="height:6px;background:var(--s4);border-radius:3px;overflow:hidden"><div style="height:6px;width:${calcScore(p)}%;background:${calcScore(p) >= 65 ? 'var(--green)' : calcScore(p) >= 35 ? 'var(--orange)' : 'var(--red)'};border-radius:3px"></div></div><div style="font-size:10px;color:var(--hint);margin-top:4px">Calcule sur les coordonnees, sequence, priorite, montant, notes, tags et activite recente.</div></div></div>` : ''}
     ${actHtml}
     ${p.lastInteraction ? `<div style="font-size:10px;color:var(--hint);margin-top:10px">Derniere interaction: ${fmtDateTime(p.lastInteraction)}</div>` : ''}
     ${(p.notes || []).length ? `<div class="section-label" style="margin-top:16px">Notes</div><div class="notes-list">${(p.notes || []).slice().reverse().map(n => `<div class="note-item"><div class="note-date">${fmtDate(n.date)}</div><div class="note-text">${n.text}</div></div>`).join('')}</div>` : ''}
   `;
   document.getElementById('mFooter').innerHTML = `
-    ${!isNew ? `<button class="btn btn-danger btn-sm" onclick="del(${p.id})">Supprimer</button>` : ''}
+    <button class="btn btn-danger btn-sm" onclick="del(${p.id})">Supprimer prospect</button>
+    ${!isNew ? `<button class="btn btn-ghost btn-sm" onclick="undoStage(${p.id})" title="Annuler le dernier appel et reculer d'une etape">\u21A9 Reculer etape</button>` : ''}
     <div style="flex:1"></div>
     <button class="btn btn-ghost btn-sm" onclick="closeModal()">Annuler</button>
     <button class="btn btn-primary" onclick="savePros(${isNew ? 'null' : p.id})">Enregistrer</button>`;
@@ -1788,24 +1881,24 @@ function buildSeqHTML(p, isNew) {
 function markDone(id, step) { const p = prospects.find(x => x.id === id); if (!p) return; if (!p.seqDone) p.seqDone = []; if (!p.seqDone.includes(step)) { p.seqDone.push(step); logActivity(p, 'seq', `Etape seq. validee: ${SEQ[step]?.label || '?'}`); } save(); openProspect(id); renderAll(); toast('Etape validee', 'ok'); }
 
 function savePros(id) {
-  const flds = ['firstName', 'lastName', 'category', 'email', 'phone', 'city', 'address', 'contactDate', 'amount', 'linkedin', 'source', 'rappelDate'];
-  const stage = parseInt(document.getElementById('f_stage').value);
-  const priority = document.getElementById('f_priority').value;
-  const tags = getTagsFromDOM();
-  const note = document.getElementById('f_note').value.trim();
+  const flds = ['firstName', 'lastName', 'email', 'phone', 'city', 'source', 'contactDate', 'rappelDate'];
+  const noteEl = document.getElementById('f_note');
+  const note = noteEl ? noteEl.value.trim() : '';
   if (id === null || id === 'null') {
-    const p = { id: uid(), stage, seqDone: [], notes: [], activity: [], createdAt: today(), priority, tags };
+    const p = { id: uid(), stage: STAGE_NEW, seqDone: [], notes: [], activity: [], callHistory: [], createdAt: today() };
     flds.forEach(f => { p[f] = document.getElementById('f_' + f)?.value || ''; });
-    if (note) p.notes.push({ date: today(), text: note });
+    if (!p.contactDate) p.contactDate = today();
     logActivity(p, 'create', 'Prospect cree');
     prospects.push(p);
   } else {
     const p = prospects.find(x => x.id === id); if (!p) return;
     const oldStage = p.stage;
+    const stage = parseInt(document.getElementById('f_stage').value);
     flds.forEach(f => { p[f] = document.getElementById('f_' + f)?.value || ''; });
     p.stage = stage;
-    p.priority = priority;
-    p.tags = tags;
+    if (stage === STAGE_LOST) {
+      p.lostReason = document.getElementById('f_lostReason')?.value || '';
+    }
     if (oldStage !== stage) logActivity(p, 'stage', `${STAGES[oldStage]?.label || '?'} \u2192 ${STAGES[stage]?.label || '?'}`);
     if (note) { p.notes.push({ date: today(), text: note }); logActivity(p, 'note', 'Note ajoutee'); }
   }
@@ -1813,15 +1906,37 @@ function savePros(id) {
 }
 
 function del(id) { if (!confirm('Supprimer ce prospect ?')) return; prospects = prospects.filter(p => p.id !== id); save(); renderAll(); closeModal(); toast('Supprime', 'ok'); }
+function undoStage(id) {
+  const p = prospects.find(x => x.id === id); if (!p) return;
+  if (!confirm('Reculer d\'une etape ? Le dernier appel enregistre sera supprime.')) return;
+  if (p.callHistory && p.callHistory.length) p.callHistory.pop();
+  if (p.seqDone && p.seqDone.length) p.seqDone.pop();
+  // Reculer d'une etape
+  if (p.stage === STAGE_LOST || p.stage === STAGE_BOOKED || p.stage === STAGE_SIGNED || p.stage === STAGE_INACTIVE) {
+    // Retour a l'appel correspondant au nombre d'appels restants
+    const n = (p.callHistory || []).length;
+    p.stage = n > 0 ? Math.min(n, STAGE_CALL_6) : STAGE_NEW;
+    p.lostReason = ''; p.bookedAt = '';
+  } else if (p.stage > STAGE_NEW) {
+    p.stage = p.stage - 1;
+  }
+  logActivity(p, 'stage', `Etape reculee -> ${STAGES[p.stage]?.label || '?'}`);
+  save(); renderAll(); openProspect(id); toast('Etape reculee', 'ok');
+}
 function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
 // =============================================
 // TASKS (includes rappels)
 // =============================================
+let tqStart = 0, tqInt = null, tqOutcome = null, tqCurrentId = null;
 function renderTasks() {
   const tasks = [];
+  const todayStr = today();
   prospects.forEach(p => {
-    if (p.stage >= 5) return;
+    if (isClosed(p.stage)) return;
+    // Skip if already called today
+    const calledToday = (p.callHistory || []).some(c => (c.date || '').slice(0, 10) === todayStr);
+    if (calledToday) return;
     const s = getSeq(p);
     if (s.step >= 0 && s.days !== null && s.days <= 3) {
       tasks.push({ prospect: p, type: 'seq', seq: SEQ[s.step], step: s.step, days: s.days, due: s.dueDate, label: SEQ[s.step].label + ' \u2014 ' + SEQ[s.step].desc });
@@ -1836,45 +1951,165 @@ function renderTasks() {
   tasks.sort((a, b) => a.days - b.days);
   const pending = tasks.filter(t => t.type === 'rappel' || !(prospects.find(p => p.id === t.prospect.id)?.seqDone || []).includes(t.step));
   const done = tasks.filter(t => t.type === 'seq' && (prospects.find(p => p.id === t.prospect.id)?.seqDone || []).includes(t.step));
+  // Appels effectues aujourd'hui
+  const todaysCalls = [];
+  prospects.forEach(p => {
+    (p.callHistory || []).forEach((c, idx) => {
+      if ((c.date || '').slice(0, 10) === todayStr) todaysCalls.push({ p, c, idx });
+    });
+  });
+  todaysCalls.sort((a, b) => (b.c.date || '').localeCompare(a.c.date || ''));
+  const outcomeColor = { 'NRP': 'var(--hint)', 'Recontacter': 'var(--orange)', 'Booke': 'var(--green)', 'Non qualifie': 'var(--red)' };
+  const todaysCallsHtml = todaysCalls.length ? `
+    <div class="task-header" style="margin-top:4px"><div class="task-counter"><div class="tc-badge" style="color:var(--gold)">${todaysCalls.length}</div><div class="tc-label">appels aujourd'hui</div></div><div style="flex:1"></div><button class="btn btn-ghost btn-sm" onclick="exportCSV()">Exporter CSV</button></div>
+    <div class="task-list">${todaysCalls.map(({ p, c }) => {
+      const col = avatarColor(p.lastName);
+      const tm = (c.date || '').slice(11, 16);
+      const oc = c.outcome || '\u2014';
+      const color = outcomeColor[oc] || 'var(--sub)';
+      return `<div class="task-item">
+        <div class="task-avatar" style="background:${col}">${initials(p)}</div>
+        <div class="task-info" onclick="openProspect(${p.id})"><div class="task-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="task-desc">Appel #${c.callNumber || '?'} &middot; ${tm} &middot; ${formatDuration(c.duration)}${c.note ? ' &middot; ' + (c.note.length > 60 ? c.note.slice(0, 60) + '\u2026' : c.note) : ''}</div></div>
+        <div class="task-meta"><span class="task-day-badge" style="background:${color}20;color:${color};border:1px solid ${color}40">${oc}${c.reason ? ' \u2013 ' + c.reason : ''}</span><div class="task-stage">${STAGES[p.stage]?.label || ''}</div></div>
+      </div>`;
+    }).join('')}</div>` : '';
   const el = document.getElementById('tasksBody');
-  if (!tasks.length) {
-    el.innerHTML = `<div class="empty-tasks"><div class="big">\u2713</div><div class="title">Aucune tache</div><p>Pas d'actions prevues dans les 3 prochains jours.</p></div>`;
-    return;
+  // Sort: late first, then today, then soon
+  tasks.sort((a, b) => a.days - b.days);
+  // Queue card = next task to do
+  let queueHtml = '';
+  if (tasks.length) {
+    const t = tasks[0]; const p = t.prospect; const col = avatarColor(p.lastName);
+    tqCurrentId = p.id;
+    tqOutcome = null;
+    tqStart = Date.now();
+    const prevNote = ((p.callHistory || []).slice(-1)[0]?.note) || ((p.notes || []).slice(-1)[0]?.text) || '';
+    const btnStyle = 'flex:1;padding:14px 8px;border:1px solid var(--b2);background:var(--s2);color:var(--text);border-radius:var(--r2);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600';
+    const remaining = tasks.length;
+    const total = tasks.length + todaysCalls.length;
+    const pct = total ? Math.round((todaysCalls.length / total) * 100) : 0;
+    queueHtml = `
+      <div style="background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--gold-b);border-radius:var(--r);padding:20px 22px;margin:14px 22px 0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gold)">Prochain appel</div><div style="flex:1"></div><div style="font-size:11px;color:var(--sub)">${todaysCalls.length} fait${todaysCalls.length > 1 ? 's' : ''} &middot; ${remaining} restant${remaining > 1 ? 's' : ''}</div></div>
+        <div style="height:4px;background:var(--s4);border-radius:2px;overflow:hidden;margin-bottom:16px"><div style="height:4px;width:${pct}%;background:var(--gold);border-radius:2px"></div></div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div class="task-avatar" style="background:${col};width:56px;height:56px;font-size:18px">${initials(p)}</div>
+          <div style="flex:1"><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600">${p.firstName || ''} ${p.lastName || ''}</div><div style="font-size:12px;color:var(--sub);margin-top:2px">${[p.source, p.city].filter(Boolean).join(' \u00b7 ') || 'Prospect'}${p.phone ? ' &middot; <a href="tel:' + p.phone + '" style="color:var(--gold);text-decoration:none">\u260E ' + p.phone + '</a>' : ''}</div><div style="font-size:11px;color:var(--gold);margin-top:4px">${t.type === 'rappel' ? '\u23F0 Rappel' : t.seq.label} &middot; ${STAGES[p.stage]?.label || ''}</div></div>
+          <div style="text-align:center"><div id="tqTimer" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--gold)">00:00</div><div style="font-size:9px;color:var(--hint);text-transform:uppercase;letter-spacing:.1em">Duree</div></div>
+        </div>
+        ${prevNote ? `<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:11px;color:var(--sub);margin-bottom:10px"><strong style="color:var(--gold)">Derniere note :</strong> ${prevNote}</div>` : ''}
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button id="tq_0" style="${btnStyle}" onclick="tqPick('NRP')">1 &middot; NRP</button>
+          <button id="tq_1" style="${btnStyle}" onclick="tqPick('Recontacter')">2 &middot; Recontacter</button>
+          <button id="tq_2" style="${btnStyle}" onclick="tqPick('Booke')">3 &middot; Booke</button>
+          <button id="tq_3" style="${btnStyle}" onclick="tqPick('Non qualifie')">4 &middot; NQ</button>
+        </div>
+        <textarea id="tq_note" placeholder="Note de l'appel (raccourcis 1/2/3/4, Entree pour valider)..." style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;min-height:60px"></textarea>
+        <div id="tq_reasonRow" style="display:none;margin-top:8px"><select id="tq_reason" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px"><option value="">Raison...</option>${LOST_REASONS.map(r => `<option>${r}</option>`).join('')}</select></div>
+        <div id="tq_bookRow" style="display:none;margin-top:8px;background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:var(--r2);padding:10px 12px"><div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:6px">\u{1F4C5} Date et heure du RDV booke</div><input type="datetime-local" id="tq_bookAt" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px;color-scheme:dark"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="tqSkip()">Passer</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-ghost btn-sm" onclick="openProspect(${p.id})">Ouvrir fiche</button>
+          <button class="btn btn-primary" onclick="tqValidate()">Enregistrer (Entree)</button>
+        </div>
+      </div>`;
   }
-  el.innerHTML = `
-    <div class="task-header">
-      <div class="task-counter"><div class="tc-badge">${pending.length}</div><div class="tc-label">a faire</div></div>
-      <div class="tc-sep"></div>
-      <div class="task-counter"><div class="tc-badge" style="color:var(--green)">${done.length}</div><div class="tc-label">terminees</div></div>
-      <div style="flex:1"></div>
-      ${pending.length ? `<button class="focus-btn" onclick="startFocus()">Mode Focus</button>` : ''}
-    </div>
-    <div class="task-list">${tasks.map(t => {
+  // Upcoming queue (list of remaining tasks after current)
+  const upcomingHtml = tasks.length > 1 ? `
+    <div class="task-header" style="margin-top:10px"><div class="task-counter"><div class="tc-badge">${tasks.length - 1}</div><div class="tc-label">suivants</div></div><div style="flex:1"></div></div>
+    <div class="task-list">${tasks.slice(1).map(t => {
       const p = t.prospect; const col = avatarColor(p.lastName);
-      const isDone = t.type === 'seq' && (p.seqDone || []).includes(t.step);
       let badge = '';
       if (t.days < 0) badge = `<span class="task-day-badge tdb-late">${Math.abs(t.days)}j retard</span>`;
       else if (t.days === 0) badge = `<span class="task-day-badge tdb-today">Aujourd'hui</span>`;
       else badge = `<span class="task-day-badge tdb-soon">J+${t.days}</span>`;
       const icon = t.type === 'rappel' ? '\u23F0' : '';
-      return `<div class="task-item${isDone ? ' done-task' : ''}">
-        <div class="task-check${isDone ? ' checked' : ''}" onclick="event.stopPropagation();${t.type === 'seq' ? `markDone(${p.id},${t.step})` : `clearRappel(${p.id})`}"></div>
+      return `<div class="task-item">
+        <div class="task-check" onclick="event.stopPropagation();${t.type === 'seq' ? `openCallDialog(${p.id})` : `clearRappel(${p.id})`}"></div>
         <div class="task-avatar" style="background:${col}">${initials(p)}</div>
         <div class="task-info" onclick="openProspect(${p.id})"><div class="task-name">${icon} ${p.firstName || ''} ${p.lastName || ''}</div><div class="task-desc">${t.label}</div></div>
         <div class="task-meta">${badge}<div class="task-stage">${STAGES[p.stage]?.label || ''}</div></div>
       </div>`;
-    }).join('')}</div>`;
+    }).join('')}</div>` : '';
+  if (!tasks.length && !todaysCalls.length) {
+    el.innerHTML = `<div class="empty-tasks"><div class="big">\u2713</div><div class="title">Aucune tache</div><p>Pas d'actions prevues dans les 3 prochains jours.</p></div>`;
+    return;
+  }
+  if (!tasks.length) {
+    el.innerHTML = `<div class="empty-tasks" style="padding:30px 22px"><div class="big" style="color:var(--green)">\u2713</div><div class="title">Journee terminee !</div><p>Tous les appels du jour sont faits.</p></div>` + todaysCallsHtml;
+    return;
+  }
+  el.innerHTML = queueHtml + upcomingHtml + todaysCallsHtml;
+  // Start timer
+  if (tqInt) clearInterval(tqInt);
+  tqInt = setInterval(() => {
+    const sec = Math.floor((Date.now() - tqStart) / 1000);
+    const m = Math.floor(sec / 60), s = sec % 60;
+    const t2 = document.getElementById('tqTimer');
+    if (t2) t2.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    else { clearInterval(tqInt); tqInt = null; }
+  }, 1000);
 }
+function tqPick(o) {
+  tqOutcome = o;
+  ['NRP', 'Recontacter', 'Booke', 'Non qualifie'].forEach((x, i) => {
+    const b = document.getElementById('tq_' + i);
+    if (b) b.style.background = (o === x) ? 'var(--gold-bg)' : 'var(--s2)';
+    if (b) b.style.borderColor = (o === x) ? 'var(--gold)' : 'var(--b2)';
+  });
+  const rr = document.getElementById('tq_reasonRow');
+  if (rr) rr.style.display = (o === 'Non qualifie') ? 'block' : 'none';
+  const br = document.getElementById('tq_bookRow');
+  if (br) {
+    br.style.display = (o === 'Booke') ? 'block' : 'none';
+    if (o === 'Booke') {
+      const inp = document.getElementById('tq_bookAt');
+      if (inp && !inp.value) { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); inp.value = d.toISOString().slice(0, 16); setTimeout(() => inp.focus(), 50); }
+    }
+  }
+}
+function tqValidate() {
+  if (!tqOutcome) { toast('Choisissez un outcome (1/2/3/4)', 'err'); return; }
+  const p = prospects.find(x => x.id === tqCurrentId); if (!p) return;
+  const duration = Math.floor((Date.now() - tqStart) / 1000);
+  const note = document.getElementById('tq_note')?.value.trim() || '';
+  const reason = tqOutcome === 'Non qualifie' ? (document.getElementById('tq_reason')?.value || '') : '';
+  const bookAt = tqOutcome === 'Booke' ? (document.getElementById('tq_bookAt')?.value || '') : '';
+  if (tqOutcome === 'Booke' && !bookAt) { toast('Choisis la date du RDV', 'err'); return; }
+  applyCallOutcome(p, tqOutcome, note, reason, duration, bookAt);
+  save(); renderAll(); toast('Appel enregistre', 'ok');
+}
+function tqSkip() {
+  // Mark sequence step as done to skip without logging a call
+  const p = prospects.find(x => x.id === tqCurrentId); if (!p) return;
+  const s = getSeq(p);
+  if (s.step >= 0) { if (!p.seqDone) p.seqDone = []; if (!p.seqDone.includes(s.step)) p.seqDone.push(s.step); logActivity(p, 'seq', `Etape passee: ${SEQ[s.step]?.label || '?'}`); }
+  save(); renderAll(); toast('Passe', 'ok');
+}
+function tqKey(e) {
+  if (currentTab !== 'tasks') return;
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+    if (e.key === 'Enter' && !e.shiftKey && e.target.id === 'tq_note') { e.preventDefault(); tqValidate(); }
+    return;
+  }
+  if (e.key === '1') tqPick('NRP');
+  else if (e.key === '2') tqPick('Recontacter');
+  else if (e.key === '3') tqPick('Booke');
+  else if (e.key === '4') tqPick('Non qualifie');
+  else if (e.key === 'Enter') { e.preventDefault(); tqValidate(); }
+}
+document.addEventListener('keydown', tqKey);
 function clearRappel(id) { const p = prospects.find(x => x.id === id); if (p) { p.rappelDate = ''; logActivity(p, 'seq', 'Rappel traite'); save(); renderAll(); toast('Rappel traite', 'ok'); } }
 
 // =============================================
 // FOCUS MODE
 // =============================================
-let focusTasks = [], focusIdx = 0;
+let focusTasks = [], focusIdx = 0, focusTimerStart = 0, focusTimerInt = null, focusOutcome = null;
 function startFocus() {
   focusTasks = [];
   prospects.forEach(p => {
-    if (p.stage >= 5) return;
+    if (isClosed(p.stage)) return;
     const s = getSeq(p);
     if (s.step >= 0 && s.days !== null && s.days <= 3 && !(p.seqDone || []).includes(s.step)) {
       focusTasks.push({ prospect: p, seq: SEQ[s.step], step: s.step, days: s.days });
@@ -1884,23 +2119,241 @@ function startFocus() {
   if (!focusTasks.length) return;
   focusIdx = 0; renderFocus();
   document.getElementById('focusOverlay').classList.remove('hidden');
+  document.addEventListener('keydown', focusKey);
 }
-function closeFocusMode() { document.getElementById('focusOverlay').classList.add('hidden'); renderAll(); }
+function closeFocusMode() {
+  document.getElementById('focusOverlay').classList.add('hidden');
+  if (focusTimerInt) { clearInterval(focusTimerInt); focusTimerInt = null; }
+  document.removeEventListener('keydown', focusKey);
+  renderAll();
+}
+function focusKey(e) {
+  if (document.getElementById('focusOverlay').classList.contains('hidden')) return;
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); focusValidate(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeFocusMode(); }
+    return;
+  }
+  if (e.key === '1') { focusOutcome = 'NRP'; renderFocusOutcomes(); }
+  else if (e.key === '2') { focusOutcome = 'Recontacter'; renderFocusOutcomes(); }
+  else if (e.key === '3') { focusOutcome = 'Booke'; renderFocusOutcomes(); }
+  else if (e.key === '4') { focusOutcome = 'Non qualifie'; renderFocusOutcomes(); }
+  else if (e.key === 'Enter') { e.preventDefault(); focusValidate(); }
+  else if (e.key === 'Escape') closeFocusMode();
+}
+function renderFocusOutcomes() {
+  ['NRP', 'Recontacter', 'Booke', 'Non qualifie'].forEach((o, i) => {
+    const b = document.getElementById('fo_' + i);
+    if (b) { b.style.background = (focusOutcome === o) ? 'var(--gold-bg)' : 'var(--s2)'; b.style.borderColor = (focusOutcome === o) ? 'var(--gold)' : 'var(--b2)'; }
+  });
+  const reasonRow = document.getElementById('fo_reasonRow');
+  if (reasonRow) reasonRow.style.display = (focusOutcome === 'Non qualifie') ? 'block' : 'none';
+  const bookRow = document.getElementById('fo_bookRow');
+  if (bookRow) {
+    bookRow.style.display = (focusOutcome === 'Booke') ? 'block' : 'none';
+    if (focusOutcome === 'Booke') {
+      const inp = document.getElementById('fo_bookAt');
+      if (inp && !inp.value) { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); inp.value = d.toISOString().slice(0, 16); }
+    }
+  }
+}
 function renderFocus() {
   const card = document.getElementById('focusCard');
+  if (focusTimerInt) { clearInterval(focusTimerInt); focusTimerInt = null; }
   if (focusIdx >= focusTasks.length) {
     card.innerHTML = `<div class="focus-done-screen"><div class="big">\u2713</div><h2>Termine !</h2><p>Toutes les taches sont faites.</p><button class="btn btn-primary" onclick="closeFocusMode()" style="margin-top:20px">Fermer</button></div>`;
     return;
   }
   const t = focusTasks[focusIdx]; const p = t.prospect; const col = avatarColor(p.lastName);
-  const pct = Math.round((focusIdx / focusTasks.length) * 100);
-  let dueClass = 'tdb-soon', dueText = 'J+' + t.days;
-  if (t.days < 0) { dueClass = 'tdb-late'; dueText = Math.abs(t.days) + 'j retard'; }
-  else if (t.days === 0) { dueClass = 'tdb-today'; dueText = "Aujourd'hui"; }
-  card.innerHTML = `<div class="focus-top"><div class="focus-progress"><div class="focus-bar" style="width:${pct}%"></div></div><div class="focus-prospect"><div class="focus-avatar" style="background:${col}">${initials(p)}</div><div><div class="focus-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="focus-sub">${[p.category, p.city].filter(Boolean).join(' \u00b7 ') || 'Prospect'}</div></div></div><div class="focus-task-block"><div class="focus-task-icon">${t.seq.icon}</div><div class="focus-task-label">${t.seq.label}</div><div class="focus-task-desc">${t.seq.desc}</div><div class="focus-due ${dueClass}" style="margin-top:12px">${dueText}</div></div></div><div class="focus-actions"><button class="focus-done-btn" onclick="focusDone()">\u2713 Fait</button><button class="focus-skip-btn" onclick="focusSkip()">Passer</button></div>`;
+  const pct = Math.round(((focusIdx) / focusTasks.length) * 100);
+  const prevNote = ((p.callHistory || []).slice(-1)[0]?.note) || ((p.notes || []).slice(-1)[0]?.text) || '';
+  focusOutcome = null;
+  focusTimerStart = Date.now();
+  const btnStyle = 'flex:1;padding:14px 8px;border:1px solid var(--b2);background:var(--s2);color:var(--text);border-radius:var(--r2);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:var(--t)';
+  card.innerHTML = `
+    <div class="focus-top">
+      <div class="focus-progress"><div class="focus-bar" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:var(--sub);margin-bottom:6px">${focusIdx + 1} / ${focusTasks.length}</div>
+      <div class="focus-prospect"><div class="focus-avatar" style="background:${col}">${initials(p)}</div><div><div class="focus-name">${p.firstName || ''} ${p.lastName || ''}</div><div class="focus-sub">${[p.source, p.city].filter(Boolean).join(' \u00b7 ') || 'Prospect'}${p.phone ? ' &middot; <a href="tel:' + p.phone + '" style="color:var(--gold);text-decoration:none">' + p.phone + '</a>' : ''}</div></div></div>
+      <div style="text-align:center;margin:16px 0"><div id="focusTimer" style="font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--gold);letter-spacing:.02em">00:00</div><div style="font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:.1em">Duree appel</div></div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:4px">${t.seq.label} &middot; ${t.seq.desc}</div>
+      ${prevNote ? `<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:11px;color:var(--sub);margin-top:8px"><strong style="color:var(--gold)">Derniere note :</strong> ${prevNote}</div>` : ''}
+    </div>
+    <div class="focus-actions" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:6px">
+        <button id="fo_0" style="${btnStyle}" onclick="focusOutcome='NRP';renderFocusOutcomes()">1 &middot; NRP</button>
+        <button id="fo_1" style="${btnStyle}" onclick="focusOutcome='Recontacter';renderFocusOutcomes()">2 &middot; Recontacter</button>
+        <button id="fo_2" style="${btnStyle}" onclick="focusOutcome='Booke';renderFocusOutcomes()">3 &middot; Booke</button>
+        <button id="fo_3" style="${btnStyle}" onclick="focusOutcome='Non qualifie';renderFocusOutcomes()">4 &middot; NQ</button>
+      </div>
+      <textarea id="fo_note" placeholder="Note de l'appel..." style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;min-height:70px"></textarea>
+      <div id="fo_reasonRow" style="display:none"><select id="fo_reason" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px"><option value="">Raison...</option>${LOST_REASONS.map(r => `<option>${r}</option>`).join('')}</select></div>
+      <div id="fo_bookRow" style="display:none;background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:var(--r2);padding:10px 12px"><div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:6px">\u{1F4C5} Date et heure du RDV</div><input type="datetime-local" id="fo_bookAt" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px;color-scheme:dark"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" style="flex:1" onclick="focusSkip()">Passer</button>
+        <button class="btn btn-primary" style="flex:2" onclick="focusValidate()">Valider (Entree)</button>
+      </div>
+    </div>`;
+  focusTimerInt = setInterval(() => {
+    const sec = Math.floor((Date.now() - focusTimerStart) / 1000);
+    const m = Math.floor(sec / 60), s = sec % 60;
+    const t2 = document.getElementById('focusTimer');
+    if (t2) t2.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }, 1000);
 }
-function focusDone() { const t = focusTasks[focusIdx]; markDone(t.prospect.id, t.step); focusIdx++; renderFocus(); }
+function focusValidate() {
+  if (!focusOutcome) { toast('Choisissez un outcome (1/2/3/4)', 'err'); return; }
+  const t = focusTasks[focusIdx]; const p = t.prospect;
+  const duration = Math.floor((Date.now() - focusTimerStart) / 1000);
+  const note = document.getElementById('fo_note')?.value.trim() || '';
+  const reason = focusOutcome === 'Non qualifie' ? (document.getElementById('fo_reason')?.value || '') : '';
+  const bookAt = focusOutcome === 'Booke' ? (document.getElementById('fo_bookAt')?.value || '') : '';
+  if (focusOutcome === 'Booke' && !bookAt) { toast('Choisis la date du RDV', 'err'); return; }
+  applyCallOutcome(p, focusOutcome, note, reason, duration, bookAt);
+  focusIdx++;
+  renderFocus();
+}
 function focusSkip() { focusIdx++; renderFocus(); }
+
+// =============================================
+// CALL DIALOG
+// =============================================
+let cdProspectId = null, cdStart = 0, cdInt = null, cdOutcome = null;
+function openCallDialog(id) {
+  const p = prospects.find(x => x.id === id); if (!p) return;
+  cdProspectId = id; cdOutcome = null; cdStart = Date.now();
+  const callNum = Math.min((p.callHistory?.length || 0) + 1, 6);
+  const prevNote = ((p.callHistory || []).slice(-1)[0]?.note) || ((p.notes || []).slice(-1)[0]?.text) || '';
+  const btnStyle = 'flex:1;padding:12px 8px;border:1px solid var(--b2);background:var(--s2);color:var(--text);border-radius:var(--r2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600';
+  document.getElementById('callDialog').innerHTML = `
+    <div style="padding:22px 24px 10px;border-bottom:1px solid var(--border)">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600">${p.firstName || ''} ${p.lastName || ''}</div>
+      <div style="font-size:11px;color:var(--sub);margin-top:4px">Appel #${callNum}${p.phone ? ' &middot; <a href="tel:' + p.phone + '" style="color:var(--gold);text-decoration:none">' + p.phone + '</a>' : ''}</div>
+    </div>
+    <div style="padding:18px 24px">
+      <div style="text-align:center;margin-bottom:14px"><div id="cdTimer" style="font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--gold)">00:00</div></div>
+      ${prevNote ? `<div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;font-size:11px;color:var(--sub);margin-bottom:12px"><strong style="color:var(--gold)">Derniere note :</strong> ${prevNote}</div>` : ''}
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button id="cd_0" style="${btnStyle}" onclick="cdOutcome='NRP';renderCdOutcomes()">1 &middot; NRP</button>
+        <button id="cd_1" style="${btnStyle}" onclick="cdOutcome='Recontacter';renderCdOutcomes()">2 &middot; Recontacter</button>
+        <button id="cd_2" style="${btnStyle}" onclick="cdOutcome='Booke';renderCdOutcomes()">3 &middot; Booke</button>
+        <button id="cd_3" style="${btnStyle}" onclick="cdOutcome='Non qualifie';renderCdOutcomes()">4 &middot; NQ</button>
+      </div>
+      <textarea id="cd_note" placeholder="Note de l'appel..." style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px;resize:vertical;min-height:80px"></textarea>
+      <div id="cd_reasonRow" style="display:none;margin-top:8px"><select id="cd_reason" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px"><option value="">Raison...</option>${LOST_REASONS.map(r => `<option>${r}</option>`).join('')}</select></div>
+      <div id="cd_bookRow" style="display:none;margin-top:8px;background:var(--gold-bg);border:1px solid var(--gold-b);border-radius:var(--r2);padding:10px 12px"><div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:6px">\u{1F4C5} Date et heure du RDV</div><input type="datetime-local" id="cd_bookAt" style="width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r2);padding:10px;color:var(--text);font-family:inherit;font-size:13px;color-scheme:dark"></div>
+    </div>
+    <div style="display:flex;gap:8px;padding:14px 24px;border-top:1px solid var(--border)">
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="closeCallDialog()">Annuler (Esc)</button>
+      <button class="btn btn-primary" onclick="cdValidate()">Enregistrer (Entree)</button>
+    </div>`;
+  document.getElementById('callOverlay').classList.remove('hidden');
+  cdInt = setInterval(() => {
+    const sec = Math.floor((Date.now() - cdStart) / 1000);
+    const m = Math.floor(sec / 60), s = sec % 60;
+    const t = document.getElementById('cdTimer');
+    if (t) t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }, 1000);
+  document.addEventListener('keydown', cdKey);
+}
+function renderCdOutcomes() {
+  ['NRP', 'Recontacter', 'Booke', 'Non qualifie'].forEach((o, i) => {
+    const b = document.getElementById('cd_' + i);
+    if (!b) return;
+    b.style.background = cdOutcome === o ? 'var(--gold)' : 'var(--s2)';
+    b.style.color = cdOutcome === o ? 'var(--bg)' : 'var(--text)';
+  });
+  document.getElementById('cd_reasonRow').style.display = (cdOutcome === 'Non qualifie') ? 'block' : 'none';
+  const br = document.getElementById('cd_bookRow');
+  if (br) {
+    br.style.display = (cdOutcome === 'Booke') ? 'block' : 'none';
+    if (cdOutcome === 'Booke') {
+      const inp = document.getElementById('cd_bookAt');
+      if (inp && !inp.value) { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(10, 0, 0, 0); inp.value = d.toISOString().slice(0, 16); }
+    }
+  }
+}
+function cdKey(e) {
+  if (document.getElementById('callOverlay').classList.contains('hidden')) return;
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
+    if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); cdValidate(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeCallDialog(); }
+    return;
+  }
+  if (e.key === '1') { cdOutcome = 'NRP'; renderCdOutcomes(); }
+  else if (e.key === '2') { cdOutcome = 'Recontacter'; renderCdOutcomes(); }
+  else if (e.key === '3') { cdOutcome = 'Booke'; renderCdOutcomes(); }
+  else if (e.key === '4') { cdOutcome = 'Non qualifie'; renderCdOutcomes(); }
+  else if (e.key === 'Enter') { e.preventDefault(); cdValidate(); }
+  else if (e.key === 'Escape') closeCallDialog();
+}
+function closeCallDialog() {
+  document.getElementById('callOverlay').classList.add('hidden');
+  if (cdInt) { clearInterval(cdInt); cdInt = null; }
+  document.removeEventListener('keydown', cdKey);
+}
+function cdValidate() {
+  if (!cdOutcome) { toast('Choisissez un outcome (1/2/3/4)', 'err'); return; }
+  const p = prospects.find(x => x.id === cdProspectId); if (!p) return;
+  const duration = Math.floor((Date.now() - cdStart) / 1000);
+  const note = document.getElementById('cd_note')?.value.trim() || '';
+  const reason = cdOutcome === 'Non qualifie' ? (document.getElementById('cd_reason')?.value || '') : '';
+  const bookAt = cdOutcome === 'Booke' ? (document.getElementById('cd_bookAt')?.value || '') : '';
+  if (cdOutcome === 'Booke' && !bookAt) { toast('Choisis la date du RDV', 'err'); return; }
+  applyCallOutcome(p, cdOutcome, note, reason, duration, bookAt);
+  closeCallDialog();
+  openProspect(p.id);
+  renderAll();
+}
+
+function applyCallOutcome(p, outcome, note, reason, duration, bookAt) {
+  if (!p.callHistory) p.callHistory = [];
+  const callNumber = Math.min(p.callHistory.length + 1, 6);
+  p.callHistory.push({ callNumber, outcome, note, reason, duration, date: nowISO(), bookAt: bookAt || '' });
+  if (outcome === 'Booke' && bookAt) { p.bookedAt = bookAt; p.rappelDate = bookAt.slice(0, 10); }
+  if (!p.contactDate) p.contactDate = today();
+  // Smart rappel from note text
+  if (note) {
+    const lower = note.toLowerCase();
+    const wdMap = { 'lundi': 1, 'mardi': 2, 'mercredi': 3, 'jeudi': 4, 'vendredi': 5, 'samedi': 6, 'dimanche': 0 };
+    let rappel = null;
+    if (/\bdemain\b/.test(lower)) rappel = addDays(today(), 1);
+    else {
+      for (const [w, idx] of Object.entries(wdMap)) {
+        if (new RegExp('\\b' + w + '\\b').test(lower)) {
+          const now = new Date(); const cur = now.getDay(); let diff = (idx - cur + 7) % 7; if (diff === 0) diff = 7;
+          rappel = addDays(today(), diff); break;
+        }
+      }
+      const m = lower.match(/dans\s+(\d+)\s+jour/);
+      if (m) rappel = addDays(today(), parseInt(m[1]));
+    }
+    if (rappel) p.rappelDate = rappel;
+  }
+  // Auto-advance stage
+  const prev = p.stage;
+  if (outcome === 'Booke') p.stage = STAGE_BOOKED;
+  else if (outcome === 'Non qualifie') { p.stage = STAGE_LOST; p.lostReason = reason; }
+  else {
+    // NRP or Recontacter
+    if (p.stage === STAGE_NEW) p.stage = STAGE_CALL_1;
+    else if (isCallStage(p.stage)) {
+      if (p.stage < STAGE_CALL_6) p.stage = p.stage + 1;
+      else p.stage = STAGE_INACTIVE;
+    }
+  }
+  // Mark seq step done for progression
+  const s = getSeq(p);
+  if (s.step >= 0 && !(p.seqDone || []).includes(s.step)) {
+    if (!p.seqDone) p.seqDone = [];
+    p.seqDone.push(s.step);
+  }
+  logActivity(p, 'call', `Appel #${callNumber} &middot; ${outcome}${reason ? ' (' + reason + ')' : ''}`);
+  if (prev !== p.stage) logActivity(p, 'stage', `${STAGES[prev]?.label || '?'} \u2192 ${STAGES[p.stage]?.label || '?'}`);
+  save();
+  toast('Appel enregistre', 'ok');
+}
 
 // =============================================
 // IMPORT (with duplicate detection)
@@ -1954,68 +2407,92 @@ function doImport() {
 // =============================================
 function renderStats() {
   const el = document.getElementById('statsGrid');
-  const byStage = STAGES.map(s => ({ label: s.label, n: prospects.filter(p => p.stage === s.id).length, color: s.color }));
-  const maxS = Math.max(...byStage.map(s => s.n), 1);
-  const catMap = {}; prospects.forEach(p => { if (p.category) catMap[p.category] = (catMap[p.category] || 0) + 1; });
-  const byCat = Object.entries(catMap).sort((a, b) => b[1] - a[1]).slice(0, 8); const maxC = Math.max(...byCat.map(s => s[1]), 1);
-  const seqN = SEQ.map((_, i) => prospects.filter(p => (p.seqDone || []).includes(i)).length); const maxSq = Math.max(...seqN, 1);
-  const srcMap = {}; prospects.forEach(p => { if (p.source) srcMap[p.source] = (srcMap[p.source] || 0) + 1; });
-  const bySrc = Object.entries(srcMap).sort((a, b) => b[1] - a[1]).slice(0, 6); const maxSrc = Math.max(...bySrc.map(s => s[1]), 1);
-  const revByStage = STAGES.map(s => { const amt = prospects.filter(p => p.stage === s.id).reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0); return { label: s.label, val: amt, color: s.color }; });
-  const maxRev = Math.max(...revByStage.map(s => s.val), 1);
+  const tot = prospects.length || 1;
+  const contacted = prospects.filter(p => (p.callHistory || []).length > 0);
+  const contactRate = Math.round(contacted.length / tot * 100);
+  const booked = prospects.filter(p => p.stage === STAGE_BOOKED || p.stage === STAGE_SIGNED);
+  const bookRate = contacted.length ? Math.round(booked.length / contacted.length * 100) : 0;
+  // Taux de reponse par appel (decroche = outcome autre que NRP)
+  let totalCalls = 0, answeredCalls = 0;
+  prospects.forEach(p => { (p.callHistory || []).forEach(c => { totalCalls++; if (c.outcome && c.outcome !== 'NRP') answeredCalls++; }); });
+  const answerRate = totalCalls ? Math.round(answeredCalls / totalCalls * 100) : 0;
 
-  // Priority breakdown
-  const prioMap = { hot: 0, warm: 0, cold: 0, '': 0 };
-  prospects.forEach(p => { prioMap[p.priority || ''] = (prioMap[p.priority || ''] || 0) + 1; });
+  // Avg calls before book
+  let sumCallsBook = 0, nBooked = 0;
+  prospects.forEach(p => {
+    if (p.stage === STAGE_BOOKED || p.stage === STAGE_SIGNED) {
+      const h = p.callHistory || [];
+      const idx = h.findIndex(c => c.outcome === 'Booke');
+      if (idx >= 0) { sumCallsBook += idx + 1; nBooked++; }
+      else if (h.length) { sumCallsBook += h.length; nBooked++; }
+    }
+  });
+  const avgCallsBook = nBooked ? (sumCallsBook / nBooked).toFixed(1) : '\u2014';
 
-  // Conversion funnel
-  const funnelStages = STAGES.filter(s => s.id !== 6);
-  const funnelData = funnelStages.map(s => prospects.filter(p => p.stage >= s.id && p.stage !== 6).length);
-  const maxFn = Math.max(...funnelData, 1);
+  // Top objections
+  const objMap = {};
+  prospects.forEach(p => { if (p.lostReason) objMap[p.lostReason] = (objMap[p.lostReason] || 0) + 1; });
+  const topObj = Object.entries(objMap).sort((a, b) => b[1] - a[1]);
+  const maxObj = Math.max(...topObj.map(o => o[1]), 1);
+
+  // Heatmap 7 (jours) x 24 (heures)
+  const heat = Array.from({ length: 7 }, () => Array(24).fill(0));
+  let maxH = 1;
+  prospects.forEach(p => {
+    (p.callHistory || []).forEach(c => {
+      if (!c.date) return;
+      const d = new Date(c.date);
+      const wd = (d.getDay() + 6) % 7; // Monday=0
+      const h = d.getHours();
+      heat[wd][h]++;
+      if (heat[wd][h] > maxH) maxH = heat[wd][h];
+    });
+  });
+  const wdLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+  // Perf par source
+  const srcStats = {};
+  prospects.forEach(p => {
+    const s = p.source || 'Inconnue';
+    if (!srcStats[s]) srcStats[s] = { total: 0, contacted: 0, booked: 0 };
+    srcStats[s].total++;
+    if ((p.callHistory || []).length) srcStats[s].contacted++;
+    if (p.stage === STAGE_BOOKED || p.stage === STAGE_SIGNED) srcStats[s].booked++;
+  });
 
   el.innerHTML = `
-    <div class="stat-card"><h3>Entonnoir de conversion</h3>${funnelStages.map((s, i) => `<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track" style="height:8px"><div class="bar-fill" style="width:${funnelData[i] / maxFn * 100}%;background:${s.color};height:8px;border-radius:4px"></div></div><div class="bar-n">${funnelData[i]}</div></div>`).join('')}</div>
-    <div class="stat-card"><h3>Par etape</h3>${byStage.map(s => `<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track"><div class="bar-fill" style="width:${s.n / maxS * 100}%;background:${s.color}"></div></div><div class="bar-n">${s.n}</div></div>`).join('')}</div>
-    <div class="stat-card"><h3>Par profil</h3>${byCat.length ? byCat.map(([c, n]) => `<div class="bar-row"><div class="bar-lbl">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${n / maxC * 100}%;background:var(--gold)"></div></div><div class="bar-n">${n}</div></div>`).join('') : `<p style="color:var(--sub);font-size:12px">Aucune donnee</p>`}</div>
-    <div class="stat-card"><h3>Par source</h3>${bySrc.length ? bySrc.map(([c, n]) => `<div class="bar-row"><div class="bar-lbl">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${n / maxSrc * 100}%;background:var(--cyan)"></div></div><div class="bar-n">${n}</div></div>`).join('') : `<p style="color:var(--sub);font-size:12px">Aucune donnee</p>`}</div>
-    <div class="stat-card"><h3>Par priorite</h3>
-      <div class="bar-row"><div class="bar-lbl">Chaud</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap.hot / Math.max(prospects.length, 1) * 100}%;background:#ef4444"></div></div><div class="bar-n">${prioMap.hot}</div></div>
-      <div class="bar-row"><div class="bar-lbl">Tiede</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap.warm / Math.max(prospects.length, 1) * 100}%;background:#f59e0b"></div></div><div class="bar-n">${prioMap.warm}</div></div>
-      <div class="bar-row"><div class="bar-lbl">Froid</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap.cold / Math.max(prospects.length, 1) * 100}%;background:#22d3ee"></div></div><div class="bar-n">${prioMap.cold}</div></div>
-      <div class="bar-row"><div class="bar-lbl">Non defini</div><div class="bar-track"><div class="bar-fill" style="width:${prioMap[''] / Math.max(prospects.length, 1) * 100}%;background:var(--hint)"></div></div><div class="bar-n">${prioMap['']}</div></div>
+    <div class="stat-card"><h3>KPIs Setter</h3><div class="sum-grid">
+      <div><div class="sum-lbl">Taux de contact</div><div class="sum-val">${contactRate}%</div></div>
+      <div><div class="sum-lbl">Taux de reponse / appel</div><div class="sum-val">${answerRate}%</div><div style="font-size:9px;color:var(--hint);margin-top:2px">${answeredCalls}/${totalCalls} appels</div></div>
+      <div><div class="sum-lbl">Taux de book</div><div class="sum-val">${bookRate}%</div></div>
+      <div><div class="sum-lbl">Appels moy. / book</div><div class="sum-val">${avgCallsBook}</div></div>
+      <div><div class="sum-lbl">Contactes</div><div class="sum-val">${contacted.length}</div></div>
+      <div><div class="sum-lbl">Bookes</div><div class="sum-val">${booked.length}</div></div>
+    </div></div>
+    <div class="stat-card"><h3>Top objections</h3>${topObj.length ? topObj.map(([r, n]) => `<div class="bar-row"><div class="bar-lbl">${r}</div><div class="bar-track"><div class="bar-fill" style="width:${n / maxObj * 100}%;background:var(--red)"></div></div><div class="bar-n">${n}</div></div>`).join('') : '<p style="color:var(--sub);font-size:12px">Aucune donnee</p>'}</div>
+    <div class="stat-card" style="grid-column:span 2"><h3>Heatmap des creneaux d'appel</h3>
+      <div style="overflow-x:auto"><div style="display:grid;grid-template-columns:40px repeat(24,1fr);gap:2px;min-width:600px">
+        <div></div>${Array.from({ length: 24 }, (_, h) => `<div style="font-size:8px;color:var(--hint);text-align:center">${h}</div>`).join('')}
+        ${wdLabels.map((wd, i) => `<div style="font-size:10px;color:var(--sub);display:flex;align-items:center">${wd}</div>${heat[i].map(n => { const op = n ? (0.15 + 0.85 * n / maxH) : 0; return `<div title="${n} appel${n > 1 ? 's' : ''}" style="aspect-ratio:1;background:rgba(201,169,110,${op});border-radius:3px;min-height:16px;display:flex;align-items:center;justify-content:center;font-size:8px;color:${n ? 'var(--bg)' : 'var(--hint)'};font-weight:600">${n || ''}</div>`; }).join('')}`).join('')}
+      </div></div>
     </div>
-    <div class="stat-card"><h3>Montant par etape (EUR)</h3>${revByStage.map(s => `<div class="bar-row"><div class="bar-lbl">${s.label}</div><div class="bar-track"><div class="bar-fill" style="width:${s.val / maxRev * 100}%;background:${s.color}"></div></div><div class="bar-n">${s.val ? Math.round(s.val / 1000) + 'k' : 0}</div></div>`).join('')}</div>
-    <div class="stat-card"><h3>Sequence</h3>${SEQ.map((s, i) => `<div class="bar-row"><div class="bar-lbl">${s.icon} ${s.label.split('-')[0].trim()}</div><div class="bar-track"><div class="bar-fill" style="width:${seqN[i] / maxSq * 100}%;background:var(--purple)"></div></div><div class="bar-n">${seqN[i]}</div></div>`).join('')}</div>
-    <div class="stat-card"><h3>Vue globale</h3><div class="sum-grid">${[
-      ['Total', prospects.length],
-      ['Taux conv.', prospects.length ? Math.round(prospects.filter(p => p.stage === 5).length / prospects.length * 100) + '%' : '0%'],
-      ['Seq. actives', prospects.filter(p => p.contactDate && getSeq(p).step >= 0).length],
-      ['En retard', prospects.filter(p => { const s = getSeq(p); return s.step >= 0 && s.days !== null && s.days < 0; }).length],
-      ['Montant total', prospects.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0).toLocaleString('fr-FR') + ' EUR'],
-      ['Rappels actifs', prospects.filter(p => p.rappelDate && daysFromNow(p.rappelDate) <= 3).length]
-    ].map(([l, v]) => `<div><div class="sum-lbl">${l}</div><div class="sum-val">${v}</div></div>`).join('')}</div></div>`;
+    <div class="stat-card" style="grid-column:span 2"><h3>Performance par source</h3>
+      <table style="width:100%;font-size:12px"><thead><tr style="text-align:left;color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:.1em"><th style="padding:8px 6px">Source</th><th style="padding:8px 6px">Total</th><th style="padding:8px 6px">Contactes</th><th style="padding:8px 6px">Taux contact</th><th style="padding:8px 6px">Bookes</th><th style="padding:8px 6px">Taux book</th></tr></thead><tbody>
+      ${Object.entries(srcStats).sort((a, b) => b[1].total - a[1].total).map(([s, st]) => `<tr style="border-top:1px solid var(--border)"><td style="padding:8px 6px;font-weight:600">${s}</td><td style="padding:8px 6px;color:var(--sub)">${st.total}</td><td style="padding:8px 6px;color:var(--sub)">${st.contacted}</td><td style="padding:8px 6px;color:var(--gold);font-weight:600">${Math.round(st.contacted / st.total * 100)}%</td><td style="padding:8px 6px;color:var(--sub)">${st.booked}</td><td style="padding:8px 6px;color:var(--green);font-weight:600">${st.contacted ? Math.round(st.booked / st.contacted * 100) : 0}%</td></tr>`).join('')}
+      </tbody></table>
+    </div>`;
 }
 
 // =============================================
 // SETTINGS
 // =============================================
 function renderSettings() {
-  const obj = getObjectives();
   const tpls = getTemplates();
   document.getElementById('settingsBody').innerHTML = `
     <div class="set-card"><div class="set-card-title">Compte</div><div class="set-card-sub">Connecte en tant que <strong style="color:var(--gold)">${currentUser?.name || ''}</strong> (${currentUser?.email || ''})</div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="doLogout()">Se deconnecter</button></div><div style="margin-top:10px;font-size:11px;color:var(--hint)">${useFirebase ? 'Mode cloud - donnees synchronisees sur tous vos appareils' : 'Mode local - donnees stockees dans ce navigateur uniquement'}</div></div>
     <div class="set-card"><div class="set-card-title">Pipeline</div><div class="set-card-sub">Modifier etapes, sequence et profils.</div><button class="btn btn-primary" onclick="nav('kanban');setTimeout(openPipelineEditor,100)">Ouvrir l'editeur</button></div>
 
-    <div class="set-card"><div class="set-card-title">Objectifs mensuels</div><div class="set-card-sub">Definissez vos cibles. La progression s'affiche sur le Dashboard.</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
-        <div class="field"><label>Nouveaux prospects</label><input type="number" id="objNew" value="${obj.newProspects}" min="0"></div>
-        <div class="field"><label>Signatures</label><input type="number" id="objSigned" value="${obj.signed}" min="0"></div>
-        <div class="field"><label>CA cible (EUR)</label><input type="number" id="objRevenue" value="${obj.revenue}" min="0"></div>
-      </div>
-      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveObjectivesUI()">Enregistrer les objectifs</button>
-    </div>
-
-    <div class="set-card"><div class="set-card-title">Templates Email / SMS</div><div class="set-card-sub">Variables disponibles : <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{prenom}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{nom}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{entreprise}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{ville}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{email}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{telephone}</code></div>
+<div class="set-card"><div class="set-card-title">Templates Email / SMS</div><div class="set-card-sub">Variables disponibles : <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{prenom}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{nom}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{entreprise}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{ville}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{email}</code> <code style="background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--gold)">{telephone}</code></div>
       <div class="tpl-list" id="tplList">
         ${tpls.map((t, i) => `<div class="tpl-item">
           <div class="tpl-head">
@@ -2132,10 +2609,29 @@ function peRemoveCat(i) { CATS.splice(i, 1); saveConfig(); peRenderCats(); }
 // =============================================
 function exportCSV() {
   if (!prospects.length) { toast('Aucun prospect', 'err'); return; }
-  const h = ['id', 'Prenom', 'Nom', 'Profil', 'Priorite', 'Email', 'Telephone', 'Ville', 'Entreprise', 'Etape', 'Montant', 'Source', 'LinkedIn', 'Tags', '1er contact', 'Rappel', 'Cree le', 'Derniere interaction'];
-  const rows = prospects.map(p => [p.id, p.firstName || '', p.lastName || '', p.category || '', p.priority || '', p.email || '', p.phone || '', p.city || '', p.address || '', STAGES[p.stage]?.label || '', p.amount || '', p.source || '', p.linkedin || '', (p.tags || []).join(', '), p.contactDate || '', p.rappelDate || '', p.createdAt || '', p.lastInteraction || '']);
+  const h = ['Prenom', 'Nom', 'Source', 'Ville', 'Telephone', 'Email', 'Etape', 'Appel #', 'Outcome', 'Raison', 'Duree (s)', 'Note', 'Date appel'];
+  const rows = [];
+  prospects.forEach(p => {
+    const stName = STAGES[p.stage]?.label || '';
+    const calls = p.callHistory || [];
+    if (!calls.length) {
+      rows.push([p.firstName || '', p.lastName || '', p.source || '', p.city || '', p.phone || '', p.email || '', stName, '', '', '', '', '', '']);
+    } else {
+      calls.forEach(c => {
+        rows.push([p.firstName || '', p.lastName || '', p.source || '', p.city || '', p.phone || '', p.email || '', stName, c.callNumber || '', c.outcome || '', c.reason || '', c.duration || '', (c.note || '').replace(/\n/g, ' '), c.date || '']);
+      });
+    }
+  });
   const csv = [h, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
-  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = `prospects_${today()}.csv`; a.click(); toast('Export lance', 'ok');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = `appels_${today()}.csv`; a.click(); toast('Export lance', 'ok');
+}
+
+function exportProspectsCSV() {
+  if (!prospects.length) { toast('Aucun prospect', 'err'); return; }
+  const h = ['id', 'Prenom', 'Nom', 'Source', 'Email', 'Telephone', 'Ville', 'Etape', 'Raison perte', '1er contact', 'Rappel', 'Appels', 'Cree le'];
+  const rows = prospects.map(p => [p.id, p.firstName || '', p.lastName || '', p.source || '', p.email || '', p.phone || '', p.city || '', STAGES[p.stage]?.label || '', p.lostReason || '', p.contactDate || '', p.rappelDate || '', (p.callHistory || []).length, p.createdAt || '']);
+  const csv = [h, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = `prospects_${today()}.csv`; a.click(); toast('Export prospects lance', 'ok');
 }
 function toast(msg, type = 'ok') { const t = document.createElement('div'); t.className = `toast t-${type}`; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
 
